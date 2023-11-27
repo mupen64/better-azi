@@ -19,6 +19,49 @@
 /* strcpy() */
 #include <string.h>
 
+typedef struct
+{
+	u16 validation;       /* 0x00 */
+	u8  compression;      /* 0x02 */
+	u8  unknown1;         /* 0x03 */
+	u32  clockrate;        /* 0x04 */
+	u32  programcounter;   /* 0x08 */
+	u32  release;          /* 0x0c */
+	u32  crc1;             /* 0x10 */
+	u32  crc2;             /* 0x14 */
+	u64 unknown2;         /* 0x18 */
+
+	u8  name[20];         /* 0x20 - 0x33 */
+
+	u8  unknown3;         /* 0x34 */
+	u8  unknown4;         /* 0x35 */
+	u8  unknown5;         /* 0x36 */
+	u8  unknown6;         /* 0x37 */
+	u8  unknown7;         /* 0x38 */
+	u8  unknown8;         /* 0x39 */
+	u8  unknown9;         /* 0x3a */
+	u8  manufacturerid;   /* 0x3b */
+	u16 cartridgeid;      /* 0x3c */
+	u8  countrycode;      /* 0x3e */
+	u8  unknown10;        /* 0x3f */
+} t_romheader;
+
+#define CONFIGFILENAME			"Config\\AzimersLegacyAudio.ini"
+
+#define KEY_INTNAME				"INTERNAL_NAME"
+#define KEY_SYNCAUDIO			"SyncAudio"
+#define KEY_FORCESYNC			"ForceSync"
+#define KEY_AIEMULATION			"AIEmulation"
+#define KEY_VOLUME				"Volume"
+#define KEY_DRIVER				"Driver"
+#define KEY_BUFFERLEVEL			"BufferLevel"
+#define KEY_BUFFERFPS			"BufferFPS"
+#define KEY_BACKENDFPS			"BackendFPS"
+#define KEY_DISALLOWSLEEPXA2	"DisallowSleepXA2"
+#define KEY_DISALLOWSLEEPDS8	"DisallowSleepDS8"
+
+#define SECTION_GENERAL "DEFULT_SETTINGS"
+
 class Configuration
 {
 protected:
@@ -29,8 +72,6 @@ protected:
 	static INT_PTR CALLBACK AdvancedProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	static INT_PTR CALLBACK SettingsProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 #endif
-	static void LoadSettings();
-	static void SaveSettings();
 	static unsigned long configVolume;
 	static char configAudioLogFolder[MAX_FOLDER_LENGTH];
 	//static LPGUID configDevice;
@@ -55,7 +96,15 @@ protected:
 	static void ResetAdvancedPage(HWND hDlg);
 
 public:
+	static t_romheader* Header;
+	static bool RomRunning;
 	static void LoadDefaults();
+	static void LoadSettings();
+	static void SaveSettings();
+	static bool config_load();
+	static bool config_load_rom();
+	static bool config_save();
+	static bool config_save_rom();
 #ifdef _WIN32
 	static void ConfigDialog(HWND hParent);
 	static void AboutDialog(HWND hParent);

@@ -1,0 +1,1 @@
+C:\MyProjects\AziAudio_Legacy\Build\Win32\Debug\AziAudio.vcxproj.AssemblyReference.cache

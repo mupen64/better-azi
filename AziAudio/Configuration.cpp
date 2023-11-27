@@ -25,7 +25,8 @@ extern HINSTANCE hInstance; // DLL's HINSTANCE
 extern SoundDriverInterface *snd;
 
 // ************* Member Variables *************
-
+t_romheader* Configuration::Header;
+bool Configuration::RomRunning = false;
 unsigned long Configuration::configVolume;
 char Configuration::configAudioLogFolder[MAX_FOLDER_LENGTH];
 /* TODO: Enable device selection...  is this even possible across multiple API implementations? */
@@ -50,78 +51,212 @@ static SoundDriverType EnumDriverType[10];
 static int EnumDriverCount;
 #endif
 
-const char *ConfigFile = "Config/AziCfg.bin";
+//const char *ConfigFile = "Config/AziCfg.bin";
 
 // Dialog Procedures
 #if defined(_WIN32)
-//BOOL CALLBACK DSEnumProc(LPGUID lpGUID, LPCTSTR lpszDesc, LPCTSTR lpszDrvName, LPVOID lpContext);
+//bool CALLBACK DSEnumProc(LPGUID lpGUID, LPCTSTR lpszDesc, LPCTSTR lpszDrvName, LPVOID lpContext);
 INT_PTR CALLBACK ConfigProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK AdvancedProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 INT_PTR CALLBACK SettingsProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 #endif
 
+bool Configuration::config_load()
+{
+	LoadDefaults();
+
+	setSyncAudio(GetPrivateProfileInt(SECTION_GENERAL, KEY_SYNCAUDIO, getSyncAudio(), CONFIGFILENAME) != 0);
+	setForceSync(GetPrivateProfileInt(SECTION_GENERAL, KEY_FORCESYNC, getForceSync(), CONFIGFILENAME) != 0);
+	setAIEmulation(GetPrivateProfileInt(SECTION_GENERAL, KEY_AIEMULATION, getAIEmulation(), CONFIGFILENAME) != 0);
+	setVolume(GetPrivateProfileInt(SECTION_GENERAL, KEY_VOLUME, getVolume(), CONFIGFILENAME));
+	setDriver((SoundDriverType)GetPrivateProfileInt(SECTION_GENERAL, KEY_DRIVER, getDriver(), CONFIGFILENAME));
+	setBufferLevel(GetPrivateProfileInt(SECTION_GENERAL, KEY_BUFFERLEVEL, getBufferLevel(), CONFIGFILENAME));
+	setBufferFPS(GetPrivateProfileInt(SECTION_GENERAL, KEY_BUFFERFPS, getBufferFPS(), CONFIGFILENAME));
+	setBackendFPS(GetPrivateProfileInt(SECTION_GENERAL, KEY_BACKENDFPS, getBackendFPS(), CONFIGFILENAME));
+	setDisallowSleepXA2(GetPrivateProfileInt(SECTION_GENERAL, KEY_DISALLOWSLEEPXA2, getDisallowSleepXA2(), CONFIGFILENAME) != 0);
+	setDisallowSleepDS8(GetPrivateProfileInt(SECTION_GENERAL, KEY_DISALLOWSLEEPDS8, getDisallowSleepDS8(), CONFIGFILENAME) != 0);
+	return true;
+}
+
+bool Configuration::config_load_rom()
+{
+	char CRC_Entry[128];
+
+	sprintf(CRC_Entry, "%08X-%08X-C:%02X", Header->crc1, Header->crc2, Header->countrycode);
+
+	setSyncAudio(GetPrivateProfileInt(CRC_Entry, KEY_SYNCAUDIO, getSyncAudio(), CONFIGFILENAME) != 0);
+	setForceSync(GetPrivateProfileInt(CRC_Entry, KEY_FORCESYNC, getForceSync(), CONFIGFILENAME) != 0);
+	setAIEmulation(GetPrivateProfileInt(CRC_Entry, KEY_AIEMULATION, getAIEmulation(), CONFIGFILENAME) != 0);
+	setVolume(GetPrivateProfileInt(CRC_Entry, KEY_VOLUME, getVolume(), CONFIGFILENAME));
+	setDriver((SoundDriverType)GetPrivateProfileInt(CRC_Entry, KEY_DRIVER, getDriver(), CONFIGFILENAME));
+	setBufferLevel(GetPrivateProfileInt(CRC_Entry, KEY_BUFFERLEVEL, getBufferLevel(), CONFIGFILENAME));
+	setBufferFPS(GetPrivateProfileInt(CRC_Entry, KEY_BUFFERFPS, getBufferFPS(), CONFIGFILENAME));
+	setBackendFPS(GetPrivateProfileInt(CRC_Entry, KEY_BACKENDFPS, getBackendFPS(), CONFIGFILENAME));
+	setDisallowSleepXA2(GetPrivateProfileInt(CRC_Entry, KEY_DISALLOWSLEEPXA2, getDisallowSleepXA2(), CONFIGFILENAME) != 0);
+	setDisallowSleepDS8(GetPrivateProfileInt(CRC_Entry, KEY_DISALLOWSLEEPDS8, getDisallowSleepDS8(), CONFIGFILENAME) != 0);
+	return true;
+}
+
 void Configuration::LoadSettings()
 {
-	size_t file_size = 0;
-	unsigned char azicfg[256];
-	FILE *file;
-	file = fopen(ConfigFile, "rb");
-	memset(azicfg, 0, sizeof(azicfg));
-	if (file == NULL)
-	{
-		SaveSettings(); // Saves the config file with defaults
-		return;
-	}
-	else
-	{
-		for (file_size = 0; file_size < sizeof(azicfg); file_size++) {
-			const int character = fgetc(file);
-			if (character < 0 || character > 255)
-				break; /* hit EOF or a disk read error */
-			azicfg[file_size] = (unsigned char)(character);
-		}
-		if (fclose(file) != 0)
-			fputs("Failed to close config file stream.\n", stderr);
-	}
+	config_load();
 
-	setSyncAudio((azicfg[0] != 0x00) ? true : false);
-	setForceSync((azicfg[1] != 0x00) ? true : false);
-	setAIEmulation((azicfg[2] != 0x00) ? true : false);
-	setVolume((azicfg[3] > 100) ? 100 : azicfg[3]);
-	if (file_size > 4)
-	{
-		setDriver((SoundDriverType)(azicfg[4] << 8 | azicfg[5]));
-		if (configDriver < 0x1000 || configDriver > 0x1FFF)
-			setDriver(SND_DRIVER_NOSOUND);
-		if (azicfg[6] > 0) 	setBufferLevel(azicfg[6]);
-		if (azicfg[7] > 0) 	setBufferFPS(azicfg[7]);
-		if (azicfg[8] > 0) 	setBackendFPS(azicfg[8]);
-		setDisallowSleepXA2((azicfg[9] != 0x00) ? true : false);
-		setDisallowSleepDS8((azicfg[10] != 0x00) ? true : false);
-	}
-	if (SoundDriverFactory::DriverExists(configDriver) == false)
-	{
-		configDriver = SoundDriverFactory::DefaultDriver();
-	}
+	if (RomRunning)
+		config_load_rom();
+	if (snd != NULL && RomRunning)
+		snd->SetVolume(Configuration::configVolume);
+
+	return;
+
+	//size_t file_size = 0;
+	//unsigned char azicfg[256];
+	//FILE *file;
+	//file = fopen(ConfigFile, "rb");
+	//memset(azicfg, 0, sizeof(azicfg));
+	//if (file == NULL)
+	//{
+	//	SaveSettings(); // Saves the config file with defaults
+	//	return;
+	//}
+	//else
+	//{
+	//	for (file_size = 0; file_size < sizeof(azicfg); file_size++) {
+	//		const int character = fgetc(file);
+	//		if (character < 0 || character > 255)
+	//			break; /* hit EOF or a disk read error */
+	//		azicfg[file_size] = (unsigned char)(character);
+	//	}
+	//	if (fclose(file) != 0)
+	//		fputs("Failed to close config file stream.\n", stderr);
+	//}
+
+	//setSyncAudio((azicfg[0] != 0x00) ? true : false);
+	//setForceSync((azicfg[1] != 0x00) ? true : false);
+	//setAIEmulation((azicfg[2] != 0x00) ? true : false);
+	//setVolume((azicfg[3] > 100) ? 100 : azicfg[3]);
+	//if (file_size > 4)
+	//{
+	//	setDriver((SoundDriverType)(azicfg[4] << 8 | azicfg[5]));
+	//	if (configDriver < 0x1000 || configDriver > 0x1FFF)
+	//		setDriver(SND_DRIVER_NOSOUND);
+	//	if (azicfg[6] > 0) 	setBufferLevel(azicfg[6]);
+	//	if (azicfg[7] > 0) 	setBufferFPS(azicfg[7]);
+	//	if (azicfg[8] > 0) 	setBackendFPS(azicfg[8]);
+	//	setDisallowSleepXA2((azicfg[9] != 0x00) ? true : false);
+	//	setDisallowSleepDS8((azicfg[10] != 0x00) ? true : false);
+	//}
+	//if (SoundDriverFactory::DriverExists(configDriver) == false)
+	//{
+	//	configDriver = SoundDriverFactory::DefaultDriver();
+	//}
 }
+
+bool  Configuration::config_save()
+{
+	char temp[32];
+
+	sprintf(temp, "%i", getSyncAudio());
+	WritePrivateProfileString(SECTION_GENERAL, KEY_SYNCAUDIO, temp, CONFIGFILENAME);
+
+	sprintf(temp, "%i", getForceSync());
+	WritePrivateProfileString(SECTION_GENERAL, KEY_FORCESYNC, temp, CONFIGFILENAME);
+
+	sprintf(temp, "%i", getAIEmulation());
+	WritePrivateProfileString(SECTION_GENERAL, KEY_AIEMULATION, temp, CONFIGFILENAME);
+
+	sprintf(temp, "%i", getVolume());
+	WritePrivateProfileString(SECTION_GENERAL, KEY_VOLUME, temp, CONFIGFILENAME);
+
+	sprintf(temp, "%i", (int32_t)getDriver());
+	WritePrivateProfileString(SECTION_GENERAL, KEY_DRIVER, temp, CONFIGFILENAME);
+
+	sprintf(temp, "%i", getBufferLevel());
+	WritePrivateProfileString(SECTION_GENERAL, KEY_BUFFERLEVEL, temp, CONFIGFILENAME);
+
+	sprintf(temp, "%i", getBufferFPS());
+	WritePrivateProfileString(SECTION_GENERAL, KEY_BUFFERFPS, temp, CONFIGFILENAME);
+
+	sprintf(temp, "%i", getBackendFPS());
+	WritePrivateProfileString(SECTION_GENERAL, KEY_BACKENDFPS, temp, CONFIGFILENAME);
+
+	sprintf(temp, "%i", getDisallowSleepXA2());
+	WritePrivateProfileString(SECTION_GENERAL, KEY_DISALLOWSLEEPXA2, temp, CONFIGFILENAME);
+
+	sprintf(temp, "%i", getDisallowSleepDS8());
+	WritePrivateProfileString(SECTION_GENERAL, KEY_DISALLOWSLEEPDS8, temp, CONFIGFILENAME);
+
+	return TRUE;
+}
+
+bool Configuration::config_save_rom()
+{
+	char temp[40];
+	char CRC_Entry[128];
+
+	sprintf(CRC_Entry, "%08X-%08X-C:%02X", Header->crc1, Header->crc2, Header->countrycode);
+	for (int i = 0; i < 32; i++)
+		temp[i] = Header->name[i ^ 3];
+
+	temp[32] = 0;
+
+	WritePrivateProfileString(CRC_Entry, KEY_INTNAME, temp, CONFIGFILENAME);
+
+	sprintf(temp, "%i", getSyncAudio());
+	WritePrivateProfileString(CRC_Entry, KEY_SYNCAUDIO, temp, CONFIGFILENAME);
+
+	sprintf(temp, "%i", getForceSync());
+	WritePrivateProfileString(CRC_Entry, KEY_FORCESYNC, temp, CONFIGFILENAME);
+
+	sprintf(temp, "%i", getAIEmulation());
+	WritePrivateProfileString(CRC_Entry, KEY_AIEMULATION, temp, CONFIGFILENAME);
+
+	sprintf(temp, "%i", getVolume());
+	WritePrivateProfileString(CRC_Entry, KEY_VOLUME, temp, CONFIGFILENAME);
+
+	sprintf(temp, "%i", (int32_t)getDriver());
+	WritePrivateProfileString(CRC_Entry, KEY_DRIVER, temp, CONFIGFILENAME);
+
+	sprintf(temp, "%i", getBufferLevel());
+	WritePrivateProfileString(CRC_Entry, KEY_BUFFERLEVEL, temp, CONFIGFILENAME);
+
+	sprintf(temp, "%i", getBufferFPS());
+	WritePrivateProfileString(CRC_Entry, KEY_BUFFERFPS, temp, CONFIGFILENAME);
+
+	sprintf(temp, "%i", getBackendFPS());
+	WritePrivateProfileString(CRC_Entry, KEY_BACKENDFPS, temp, CONFIGFILENAME);
+
+	sprintf(temp, "%i", getDisallowSleepXA2());
+	WritePrivateProfileString(CRC_Entry, KEY_DISALLOWSLEEPXA2, temp, CONFIGFILENAME);
+
+	sprintf(temp, "%i", getDisallowSleepDS8());
+	WritePrivateProfileString(CRC_Entry, KEY_DISALLOWSLEEPDS8, temp, CONFIGFILENAME);
+
+	return TRUE;
+}
+
 void Configuration::SaveSettings()
 {
+	if (RomRunning)
+		config_save_rom();
+	else 
+		config_save();
+	return;
 	FILE *file;
-	file = fopen(ConfigFile, "wb");
-	if (file != NULL)
-	{
-		fprintf(file, "%c", getSyncAudio());
-		fprintf(file, "%c", getForceSync());
-		fprintf(file, "%c", getAIEmulation());
-		fprintf(file, "%c", getVolume());
-		fprintf(file, "%c%c", (getDriver() >> 8) & 0xFF, getDriver() & 0xFF);
-		fprintf(file, "%c", getBufferLevel());
-		fprintf(file, "%c", getBufferFPS());
-		fprintf(file, "%c", getBackendFPS());
-		fprintf(file, "%c", getDisallowSleepXA2());
-		fprintf(file, "%c", getDisallowSleepDS8());
-		fclose(file);
-	}
+	//file = fopen(ConfigFile, "wb");
+	//if (file != NULL)
+	//{
+	//	fprintf(file, "%c", getSyncAudio());
+	//	fprintf(file, "%c", getForceSync());
+	//	fprintf(file, "%c", getAIEmulation());
+	//	fprintf(file, "%c", getVolume());
+	//	fprintf(file, "%c%c", (getDriver() >> 8) & 0xFF, getDriver() & 0xFF);
+	//	fprintf(file, "%c", getBufferLevel());
+	//	fprintf(file, "%c", getBufferFPS());
+	//	fprintf(file, "%c", getBackendFPS());
+	//	fprintf(file, "%c", getDisallowSleepXA2());
+	//	fprintf(file, "%c", getDisallowSleepDS8());
+	//	fclose(file);
+	//}
 }
 
 /*
@@ -149,9 +284,9 @@ void Configuration::LoadDefaults()
 #endif
 	configVolume = 0; /* 0:  max volume; 100:  min volume */
 	EnumDriverCount = SoundDriverFactory::EnumDrivers(EnumDriverType, 10); // TODO: This needs to be fixed.  10 is an arbitrary number which doesn't meet the 20 set in MAX_FACTORY_DRIVERS
-	setDriver(SoundDriverFactory::DefaultDriver());	
+	setDriver(SND_DRIVER_DS8);
 	setAIEmulation(true);
-	setSyncAudio(true);
+	setSyncAudio(false);
 	setForceSync(false);
 	setVolume(0);
 	setFrequency(44100);
@@ -162,13 +297,14 @@ void Configuration::LoadDefaults()
 	setDisallowSleepDS8(false);
 	setDisallowSleepXA2(false);
 	setResTimer(false);
-	LoadSettings();
+	//LoadSettings();
 }
 #ifdef _WIN32
 #pragma comment(lib, "comctl32.lib")
 extern HINSTANCE hInstance;
 void Configuration::ConfigDialog(HWND hParent)
 {
+	LoadSettings();
 	//DialogBox(hInstance, MAKEINTRESOURCE(IDD_CONFIG), hParent, ConfigProc);
 	//return;
 	PROPSHEETHEADER psh;
@@ -228,7 +364,7 @@ void Configuration::AboutDialog(HWND hParent)
 #if 0 /* Disable Device Enumeration */
 // TODO: I think this can safely be removed
 #ifdef _WIN32
-BOOL CALLBACK DSEnumProc(LPGUID lpGUID, LPCTSTR lpszDesc, LPCTSTR lpszDrvName, LPVOID lpContext)
+bool CALLBACK DSEnumProc(LPGUID lpGUID, LPCTSTR lpszDesc, LPCTSTR lpszDrvName, LPVOID lpContext)
 {
 	UNREFERENCED_PARAMETER(lpszDrvName);
 	UNREFERENCED_PARAMETER(lpContext);

@@ -22,6 +22,7 @@
     <ProjectGuid>{835979AC-BC6A-45B7-A513-8EEE79B443DE}</ProjectGuid>
     <RootNamespace>AziAudio</RootNamespace>
     <ProjectName>AziAudio_Legacy</ProjectName>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -33,7 +34,7 @@
   </ImportGroup>
   <PropertyGroup Label="Configuration">
     <IntDir>$(SolutionDir)Build\$(Platform)\$(Configuration)\</IntDir>
-    <OutDir>$(SolutionDir)Target\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>..\..\PJ64_1.6.2\Plugin</OutDir>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
@@ -47,6 +48,8 @@
       <AdditionalLibraryDirectories Condition="'$(Platform)'=='x64'">$(SolutionDir)3rd Party\directx\lib\x64</AdditionalLibraryDirectories>
       <AdditionalDependencies>dsound.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <LinkTimeCodeGeneration Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\PJ64_1.6.2\Plugin\$(TargetName)$(TargetExt)</OutputFile>
+      <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\PJ64_1.6.2\Plugin\$(TargetName)$(TargetExt)</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

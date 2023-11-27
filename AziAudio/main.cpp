@@ -46,7 +46,7 @@ extern "C"
 #endif
 
 #ifdef _WIN32
-BOOL WINAPI DllMain(
+bool WINAPI DllMain(
   HINSTANCE hinstDLL,  // handle to DLL module
   DWORD fdwReason,     // reason for calling function
   LPVOID lpvReserved   // reserved
@@ -95,6 +95,7 @@ AUDIO_INFO AudioInfo;
 u32 Dacrate = 0;
 
 EXPORT Boolean CALL InitiateAudio(AUDIO_INFO Audio_Info) {
+	Configuration::LoadSettings();
 	if (snd != NULL)
 	{
 		snd->AI_Shutdown();
@@ -118,6 +119,7 @@ EXPORT Boolean CALL InitiateAudio(AUDIO_INFO Audio_Info) {
 	DMEM = Audio_Info.DMEM;
 	IMEM = Audio_Info.IMEM;
 
+	Configuration::Header = (t_romheader*)Audio_Info.HEADER;
 	Configuration::LoadDefaults();
 	snd = SoundDriverFactory::CreateSoundDriver(Configuration::getDriver());
 
@@ -146,8 +148,14 @@ EXPORT void CALL GetDllInfo(PLUGIN_INFO * PluginInfo) {
 	PluginInfo->Type = PLUGIN_TYPE_AUDIO;
 	PluginInfo->Version = 0x0101; // Set this to retain backwards compatibility
 }
-
+bool first_time = true;
 EXPORT void CALL ProcessAList(void) {
+	Configuration::RomRunning = true;
+	if (first_time)
+	{
+		first_time = false;
+		Configuration::LoadSettings();
+	}
 	if (snd == NULL)
 		return;
 	HLEStart ();
@@ -155,6 +163,12 @@ EXPORT void CALL ProcessAList(void) {
 
 EXPORT void CALL RomOpen(void) 
 {
+	Configuration::RomRunning = true;
+	if (first_time)
+	{
+		first_time = false;
+		Configuration::LoadSettings();
+	}
 	DEBUG_OUTPUT("Call: RomOpen()\n");
 	if (snd == NULL)
 		return;
@@ -163,6 +177,8 @@ EXPORT void CALL RomOpen(void)
 
 EXPORT void CALL RomClosed(void) 
 {
+	Configuration::RomRunning = false;
+	Configuration::LoadSettings();
 	DEBUG_OUTPUT("Call: RomClosed()\n");
 	Dacrate = 0; // Forces a revisit to initialize audio
 	if (snd == NULL)
@@ -348,7 +364,7 @@ void SetTimerResolution(void)
 	HMODULE hMod = GetModuleHandle("ntdll.dll");
 	if (hMod != NULL)
 	{
-		typedef LONG(NTAPI* tNtSetTimerResolution)(IN ULONG DesiredResolution, IN BOOLEAN SetResolution, OUT PULONG CurrentResolution);
+		typedef LONG(NTAPI* tNtSetTimerResolution)(IN ULONG DesiredResolution, IN Boolean SetResolution, OUT PULONG CurrentResolution);
 		tNtSetTimerResolution NtSetTimerResolution = (tNtSetTimerResolution)GetProcAddress(hMod, "NtSetTimerResolution");
 		ULONG CurrentResolution = 0;
 		NtSetTimerResolution(10000, TRUE, &CurrentResolution);
