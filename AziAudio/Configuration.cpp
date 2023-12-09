@@ -63,18 +63,19 @@ INT_PTR CALLBACK SettingsProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 
 bool Configuration::config_load()
 {
-	LoadDefaults();
+	//LoadDefaults();
+	setResTimer(false);
 
-	setSyncAudio(GetPrivateProfileInt(SECTION_GENERAL, KEY_SYNCAUDIO, getSyncAudio(), CONFIGFILENAME) != 0);
-	setForceSync(GetPrivateProfileInt(SECTION_GENERAL, KEY_FORCESYNC, getForceSync(), CONFIGFILENAME) != 0);
-	setAIEmulation(GetPrivateProfileInt(SECTION_GENERAL, KEY_AIEMULATION, getAIEmulation(), CONFIGFILENAME) != 0);
-	setVolume(GetPrivateProfileInt(SECTION_GENERAL, KEY_VOLUME, getVolume(), CONFIGFILENAME));
-	setDriver((SoundDriverType)GetPrivateProfileInt(SECTION_GENERAL, KEY_DRIVER, getDriver(), CONFIGFILENAME));
-	setBufferLevel(GetPrivateProfileInt(SECTION_GENERAL, KEY_BUFFERLEVEL, getBufferLevel(), CONFIGFILENAME));
-	setBufferFPS(GetPrivateProfileInt(SECTION_GENERAL, KEY_BUFFERFPS, getBufferFPS(), CONFIGFILENAME));
-	setBackendFPS(GetPrivateProfileInt(SECTION_GENERAL, KEY_BACKENDFPS, getBackendFPS(), CONFIGFILENAME));
-	setDisallowSleepXA2(GetPrivateProfileInt(SECTION_GENERAL, KEY_DISALLOWSLEEPXA2, getDisallowSleepXA2(), CONFIGFILENAME) != 0);
-	setDisallowSleepDS8(GetPrivateProfileInt(SECTION_GENERAL, KEY_DISALLOWSLEEPDS8, getDisallowSleepDS8(), CONFIGFILENAME) != 0);
+	setSyncAudio(GetPrivateProfileInt(SECTION_GENERAL, KEY_SYNCAUDIO, 0, CONFIGFILENAME) != 0);
+	setForceSync(GetPrivateProfileInt(SECTION_GENERAL, KEY_FORCESYNC, 0, CONFIGFILENAME) != 0);
+	setAIEmulation(GetPrivateProfileInt(SECTION_GENERAL, KEY_AIEMULATION, 1, CONFIGFILENAME) != 0);
+	setVolume(GetPrivateProfileInt(SECTION_GENERAL, KEY_VOLUME, 0, CONFIGFILENAME));
+	setDriver((SoundDriverType)GetPrivateProfileInt(SECTION_GENERAL, KEY_DRIVER, SND_DRIVER_DS8, CONFIGFILENAME));
+	setBufferLevel(GetPrivateProfileInt(SECTION_GENERAL, KEY_BUFFERLEVEL, 3, CONFIGFILENAME));
+	setBufferFPS(GetPrivateProfileInt(SECTION_GENERAL, KEY_BUFFERFPS, 45, CONFIGFILENAME));
+	setBackendFPS(GetPrivateProfileInt(SECTION_GENERAL, KEY_BACKENDFPS, 90, CONFIGFILENAME));
+	setDisallowSleepXA2(GetPrivateProfileInt(SECTION_GENERAL, KEY_DISALLOWSLEEPXA2, 0, CONFIGFILENAME) != 0);
+	setDisallowSleepDS8(GetPrivateProfileInt(SECTION_GENERAL, KEY_DISALLOWSLEEPDS8, 0, CONFIGFILENAME) != 0);
 	return true;
 }
 

@@ -32,6 +32,7 @@ SoundDriverInterface *snd = NULL;
 
 bool ai_delayed_carry;  // Borrowed from MAME and Mupen64Plus
 bool bBackendChanged = false;
+bool first_time = true;
 
 void SetTimerResolution(void);
 
@@ -148,7 +149,7 @@ EXPORT void CALL GetDllInfo(PLUGIN_INFO * PluginInfo) {
 	PluginInfo->Type = PLUGIN_TYPE_AUDIO;
 	PluginInfo->Version = 0x0101; // Set this to retain backwards compatibility
 }
-bool first_time = true;
+
 EXPORT void CALL ProcessAList(void) {
 	Configuration::RomRunning = true;
 	if (first_time)
@@ -164,7 +165,7 @@ EXPORT void CALL ProcessAList(void) {
 EXPORT void CALL RomOpen(void) 
 {
 	Configuration::RomRunning = true;
-	if (first_time)
+	//if (first_time)
 	{
 		first_time = false;
 		Configuration::LoadSettings();

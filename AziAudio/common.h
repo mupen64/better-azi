@@ -118,7 +118,7 @@ extern rSettings RegSettings;
 #endif
 #endif
 
-#define PLUGIN_RELEASE " v0.70.10"
+#define PLUGIN_RELEASE " v0.70.10b"
 #define PLUGIN_BUILD  \
 	   PLUGIN_DEBUG 
 
