@@ -6,6 +6,9 @@
 ## If BUILD_ARCH is not set, we will attempt to detect the architecture.
 ## Set BUILD_DEBUG to 1 for a debug build. Anything else for a release build.
 
+#### Debug location ####
+PJ64LDIR=$(HOME)/emu/Project64
+PJ64LEXE=run.sh
 
 #### Compiler and tool definitions shared by all build targets #####
 # Cfg
@@ -45,6 +48,10 @@ SRCDIR=AziAudio
 OBJDIR=$(BINDIR)/$(BUILD_TYPE)_$(BUILD_ARCH)
 
 all: $(BINDIR)/$(PLUGIN_FILE)
+	cp "$(BINDIR)/$(PLUGIN_FILE)" "$(PJ64LDIR)/Plugin/$(PLUGIN_FILE)"
+
+run: all
+	cd $(PJ64LDIR) && $(PJ64LDIR)/$(PJ64LEXE)
 
 COMMON_OBJS =  \
 	$(OBJDIR)/WaveOut.o \
