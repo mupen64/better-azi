@@ -44,9 +44,9 @@ SoundDriverType Configuration::configDriver;
 //static int SelectedDSound;
 // DirectSound selection
 #ifdef _WIN32
-static GUID EnumDeviceGUID[20];
-static char EnumDeviceName[20][100];
-static int EnumDeviceCount;
+//static GUID EnumDeviceGUID[20];
+//static char EnumDeviceName[20][100];
+//static int EnumDeviceCount;
 static SoundDriverType EnumDriverType[10];
 static int EnumDriverCount;
 #endif
@@ -165,19 +165,19 @@ bool  Configuration::config_save()
 	sprintf(temp, "%i", getAIEmulation());
 	WritePrivateProfileString(SECTION_GENERAL, KEY_AIEMULATION, temp, CONFIGFILENAME);
 
-	sprintf(temp, "%i", getVolume());
+	sprintf(temp, "%li", getVolume());
 	WritePrivateProfileString(SECTION_GENERAL, KEY_VOLUME, temp, CONFIGFILENAME);
 
 	sprintf(temp, "%i", (int32_t)getDriver());
 	WritePrivateProfileString(SECTION_GENERAL, KEY_DRIVER, temp, CONFIGFILENAME);
 
-	sprintf(temp, "%i", getBufferLevel());
+	sprintf(temp, "%li", getBufferLevel());
 	WritePrivateProfileString(SECTION_GENERAL, KEY_BUFFERLEVEL, temp, CONFIGFILENAME);
 
-	sprintf(temp, "%i", getBufferFPS());
+	sprintf(temp, "%li", getBufferFPS());
 	WritePrivateProfileString(SECTION_GENERAL, KEY_BUFFERFPS, temp, CONFIGFILENAME);
 
-	sprintf(temp, "%i", getBackendFPS());
+	sprintf(temp, "%li", getBackendFPS());
 	WritePrivateProfileString(SECTION_GENERAL, KEY_BACKENDFPS, temp, CONFIGFILENAME);
 
 	sprintf(temp, "%i", getDisallowSleepXA2());
@@ -211,19 +211,19 @@ bool Configuration::config_save_rom()
 	sprintf(temp, "%i", getAIEmulation());
 	WritePrivateProfileString(CRC_Entry, KEY_AIEMULATION, temp, CONFIGFILENAME);
 
-	sprintf(temp, "%i", getVolume());
+	sprintf(temp, "%li", getVolume());
 	WritePrivateProfileString(CRC_Entry, KEY_VOLUME, temp, CONFIGFILENAME);
 
 	sprintf(temp, "%i", (int32_t)getDriver());
 	WritePrivateProfileString(CRC_Entry, KEY_DRIVER, temp, CONFIGFILENAME);
 
-	sprintf(temp, "%i", getBufferLevel());
+	sprintf(temp, "%li", getBufferLevel());
 	WritePrivateProfileString(CRC_Entry, KEY_BUFFERLEVEL, temp, CONFIGFILENAME);
 
-	sprintf(temp, "%i", getBufferFPS());
+	sprintf(temp, "%li", getBufferFPS());
 	WritePrivateProfileString(CRC_Entry, KEY_BUFFERFPS, temp, CONFIGFILENAME);
 
-	sprintf(temp, "%i", getBackendFPS());
+	sprintf(temp, "%li", getBackendFPS());
 	WritePrivateProfileString(CRC_Entry, KEY_BACKENDFPS, temp, CONFIGFILENAME);
 
 	sprintf(temp, "%i", getDisallowSleepXA2());
@@ -242,7 +242,7 @@ void Configuration::SaveSettings()
 	else 
 		config_save();
 	return;
-	FILE *file;
+	//FILE *file;
 	//file = fopen(ConfigFile, "wb");
 	//if (file != NULL)
 	//{
@@ -265,8 +265,8 @@ void Configuration::SaveSettings()
 */
 void Configuration::LoadDefaults()
 {
-	EnumDeviceCount = 0;
-	EnumDriverCount = 0;
+	//EnumDeviceCount = 0;
+	//EnumDriverCount = 0;
 	safe_strcpy(Configuration::configAudioLogFolder, 499, "D:\\");
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS) && !defined(_XBOX)
 	strcpy_s(Configuration::configAudioLogFolder, 500, "D:\\");
@@ -520,11 +520,11 @@ void Configuration::ResetAdvancedPage(HWND hDlg)
 	SendMessage(GetDlgItem(hDlg, IDC_DISALLOWDS8), BM_SETCHECK, tmp.configDisallowSleepDS8 ? BST_CHECKED : BST_UNCHECKED, 0);
 	SendMessage(GetDlgItem(hDlg, IDC_DISALLOWXA2), BM_SETCHECK, tmp.configDisallowSleepXA2 ? BST_CHECKED : BST_UNCHECKED, 0);
 	char textPos[20];
-	sprintf(textPos, "%i", tmp.configBufferLevel);
+	sprintf(textPos, "%li", tmp.configBufferLevel);
 	SetDlgItemText(hDlg, IDC_BUFFERS_TEXT, (LPCSTR)textPos);
-	sprintf(textPos, "%i ms", 1000 / tmp.configBackendFPS);
+	sprintf(textPos, "%li ms", 1000 / tmp.configBackendFPS);
 	SetDlgItemText(hDlg, IDC_SLIDER_BACKFPS_TEXT, (LPCSTR)textPos);
-	sprintf(textPos, "%i ms", 1000 / tmp.configBufferFPS);
+	sprintf(textPos, "%li ms", 1000 / tmp.configBufferFPS);
 	SetDlgItemText(hDlg, IDC_SLIDER_BUFFERFPS_TEXT, (LPCSTR)textPos);
 }
 
@@ -570,17 +570,17 @@ INT_PTR CALLBACK Configuration::AdvancedProc(HWND hDlg, UINT uMsg, WPARAM wParam
 			{
 				case IDC_BUFFERS:					
 					dwPosition = (unsigned long)SendMessage(GetDlgItem(hDlg, IDC_BUFFERS), TBM_GETPOS, 0, 0);
-					sprintf(textPos, "%i", dwPosition);
+					sprintf(textPos, "%li", dwPosition);
 					SetDlgItemText(hDlg, IDC_BUFFERS_TEXT, (LPCSTR)textPos);
 					break;
 				case IDC_SLIDER_BACKFPS:
 					dwPosition = (unsigned long)SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BACKFPS), TBM_GETPOS, 0, 0);
-					sprintf(textPos, "%i ms", (DWORD)(1000/(dwPosition*15)));
+					sprintf(textPos, "%li ms", (DWORD)(1000/(dwPosition*15)));
 					SetDlgItemText(hDlg, IDC_SLIDER_BACKFPS_TEXT, (LPCSTR)textPos);
 					break;
 				case IDC_SLIDER_BUFFERFPS:
 					dwPosition = (unsigned long)SendMessage(GetDlgItem(hDlg, IDC_SLIDER_BUFFERFPS), TBM_GETPOS, 0, 0);
-					sprintf(textPos, "%i ms", (DWORD)(1000 / (dwPosition * 15)));
+					sprintf(textPos, "%li ms", (DWORD)(1000 / (dwPosition * 15)));
 					SetDlgItemText(hDlg, IDC_SLIDER_BUFFERFPS_TEXT, (LPCSTR)textPos);
 					break;
 			}
