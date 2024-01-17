@@ -115,14 +115,14 @@ BOOL XAudio2SoundDriver::Setup()
 	hMutex = CreateMutex(NULL, FALSE, NULL);
 	if (FAILED(XAudio2Create(&g_engine)))
 	{
-		CoUninitialize();
+		//CoUninitialize();
 		return -1;
 	}
 
 	if (FAILED(g_engine->CreateMasteringVoice(&g_master)))
 	{
 		g_engine->Release();
-		CoUninitialize();
+		//CoUninitialize();
 		return -2;
 	}
 	canPlay = true;
@@ -144,7 +144,7 @@ BOOL XAudio2SoundDriver::Setup()
 	if (FAILED(g_engine->CreateSourceVoice(&g_source, &wfm, 0, XAUDIO2_DEFAULT_FREQ_RATIO, &voiceCallback, NULL, NULL)))
 	{
 		g_engine->Release();
-		CoUninitialize();
+		//CoUninitialize();
 		return -3;
 	}
 

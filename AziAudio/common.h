@@ -36,9 +36,10 @@
 #elif defined(_WIN32)
 #include <windows.h>
 #include <commctrl.h>
+extern OSVERSIONINFOEX OSInfo;
 #endif
 
-#ifdef USE_PRINTF
+//#ifdef USE_PRINTF
 #include <stdio.h>
 #endif
 #include <assert.h>
