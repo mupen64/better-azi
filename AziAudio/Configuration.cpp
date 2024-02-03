@@ -109,47 +109,6 @@ void Configuration::LoadSettings()
 
 	return;
 
-	//size_t file_size = 0;
-	//unsigned char azicfg[256];
-	//FILE *file;
-	//file = fopen(ConfigFile, "rb");
-	//memset(azicfg, 0, sizeof(azicfg));
-	//if (file == NULL)
-	//{
-	//	SaveSettings(); // Saves the config file with defaults
-	//	return;
-	//}
-	//else
-	//{
-	//	for (file_size = 0; file_size < sizeof(azicfg); file_size++) {
-	//		const int character = fgetc(file);
-	//		if (character < 0 || character > 255)
-	//			break; /* hit EOF or a disk read error */
-	//		azicfg[file_size] = (unsigned char)(character);
-	//	}
-	//	if (fclose(file) != 0)
-	//		fputs("Failed to close config file stream.\n", stderr);
-	//}
-
-	//setSyncAudio((azicfg[0] != 0x00) ? true : false);
-	//setForceSync((azicfg[1] != 0x00) ? true : false);
-	//setAIEmulation((azicfg[2] != 0x00) ? true : false);
-	//setVolume((azicfg[3] > 100) ? 100 : azicfg[3]);
-	//if (file_size > 4)
-	//{
-	//	setDriver((SoundDriverType)(azicfg[4] << 8 | azicfg[5]));
-	//	if (configDriver < 0x1000 || configDriver > 0x1FFF)
-	//		setDriver(SND_DRIVER_NOSOUND);
-	//	if (azicfg[6] > 0) 	setBufferLevel(azicfg[6]);
-	//	if (azicfg[7] > 0) 	setBufferFPS(azicfg[7]);
-	//	if (azicfg[8] > 0) 	setBackendFPS(azicfg[8]);
-	//	setDisallowSleepXA2((azicfg[9] != 0x00) ? true : false);
-	//	setDisallowSleepDS8((azicfg[10] != 0x00) ? true : false);
-	//}
-	//if (SoundDriverFactory::DriverExists(configDriver) == false)
-	//{
-	//	configDriver = SoundDriverFactory::DefaultDriver();
-	//}
 }
 
 bool  Configuration::config_save()
@@ -242,22 +201,6 @@ void Configuration::SaveSettings()
 	else 
 		config_save();
 	return;
-	//FILE *file;
-	//file = fopen(ConfigFile, "wb");
-	//if (file != NULL)
-	//{
-	//	fprintf(file, "%c", getSyncAudio());
-	//	fprintf(file, "%c", getForceSync());
-	//	fprintf(file, "%c", getAIEmulation());
-	//	fprintf(file, "%c", getVolume());
-	//	fprintf(file, "%c%c", (getDriver() >> 8) & 0xFF, getDriver() & 0xFF);
-	//	fprintf(file, "%c", getBufferLevel());
-	//	fprintf(file, "%c", getBufferFPS());
-	//	fprintf(file, "%c", getBackendFPS());
-	//	fprintf(file, "%c", getDisallowSleepXA2());
-	//	fprintf(file, "%c", getDisallowSleepDS8());
-	//	fclose(file);
-	//}
 }
 
 /*
@@ -285,19 +228,19 @@ void Configuration::LoadDefaults()
 #endif
 	configVolume = 0; /* 0:  max volume; 100:  min volume */
 	EnumDriverCount = SoundDriverFactory::EnumDrivers(EnumDriverType, 10); // TODO: This needs to be fixed.  10 is an arbitrary number which doesn't meet the 20 set in MAX_FACTORY_DRIVERS
-	setDriver(SND_DRIVER_DS8);
-	setAIEmulation(true);
 	setSyncAudio(false);
 	setForceSync(false);
+	setAIEmulation(true);
 	setVolume(0);
-	setFrequency(44100);
-	setBitRate(16);
+	setDriver(SND_DRIVER_DS8);
 	setBufferLevel(3);
 	setBufferFPS(45);
 	setBackendFPS(90);
 	setDisallowSleepDS8(false);
 	setDisallowSleepXA2(false);
-	setResTimer(false);
+	setFrequency(44100); // Not saved currently
+	setBitRate(16); // Not saved currently
+	setResTimer(false); // Not saved currently
 	//LoadSettings();
 }
 #ifdef _WIN32

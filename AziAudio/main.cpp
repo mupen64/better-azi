@@ -97,7 +97,6 @@ AUDIO_INFO AudioInfo;
 u32 Dacrate = 0;
 
 EXPORT Boolean CALL InitiateAudio(AUDIO_INFO Audio_Info) {
-	Configuration::LoadSettings();
 	if (snd != NULL)
 	{
 		snd->AI_Shutdown();
@@ -130,6 +129,7 @@ EXPORT Boolean CALL InitiateAudio(AUDIO_INFO Audio_Info) {
 
 	Configuration::Header = (t_romheader*)Audio_Info.HEADER;
 	Configuration::LoadDefaults();
+	Configuration::LoadSettings();
 	snd = SoundDriverFactory::CreateSoundDriver(Configuration::getDriver());
 
 	if (snd == NULL)

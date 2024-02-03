@@ -10,7 +10,7 @@
 ****************************************************************************/
 #pragma once
 
-#include "common.h"
+//#include "common.h"
 #include "Settings.h"
 #ifdef _WIN32
 #include <windows.h>
@@ -60,7 +60,7 @@ typedef struct
 #define KEY_DISALLOWSLEEPXA2	"DisallowSleepXA2"
 #define KEY_DISALLOWSLEEPDS8	"DisallowSleepDS8"
 
-#define SECTION_GENERAL "DEFULT_SETTINGS"
+#define SECTION_GENERAL "DEFAULT_SETTINGS"
 
 class Configuration
 {
