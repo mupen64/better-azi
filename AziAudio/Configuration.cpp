@@ -8,6 +8,7 @@
 * GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html                        *
 *                                                                           *
 ****************************************************************************/
+#include "../3rd Party/simpleini/SimpleIni.h" // Must be loaded before windows.h
 #include "Configuration.h"
 #include "common.h"
 
@@ -15,6 +16,7 @@
 #include "resource.h"
 #include "SoundDriverInterface.h"
 #include "SoundDriverFactory.h"
+
 
 
 #ifdef _WIN32
@@ -66,16 +68,21 @@ bool Configuration::config_load()
 	//LoadDefaults();
 	setResTimer(false);
 
-	setSyncAudio(GetPrivateProfileInt(SECTION_GENERAL, KEY_SYNCAUDIO, 0, CONFIGFILENAME) != 0);
-	setForceSync(GetPrivateProfileInt(SECTION_GENERAL, KEY_FORCESYNC, 0, CONFIGFILENAME) != 0);
-	setAIEmulation(GetPrivateProfileInt(SECTION_GENERAL, KEY_AIEMULATION, 1, CONFIGFILENAME) != 0);
-	setVolume(GetPrivateProfileInt(SECTION_GENERAL, KEY_VOLUME, 0, CONFIGFILENAME));
-	setDriver((SoundDriverType)GetPrivateProfileInt(SECTION_GENERAL, KEY_DRIVER, SND_DRIVER_DS8, CONFIGFILENAME));
-	setBufferLevel(GetPrivateProfileInt(SECTION_GENERAL, KEY_BUFFERLEVEL, 3, CONFIGFILENAME));
-	setBufferFPS(GetPrivateProfileInt(SECTION_GENERAL, KEY_BUFFERFPS, 45, CONFIGFILENAME));
-	setBackendFPS(GetPrivateProfileInt(SECTION_GENERAL, KEY_BACKENDFPS, 90, CONFIGFILENAME));
-	setDisallowSleepXA2(GetPrivateProfileInt(SECTION_GENERAL, KEY_DISALLOWSLEEPXA2, 0, CONFIGFILENAME) != 0);
-	setDisallowSleepDS8(GetPrivateProfileInt(SECTION_GENERAL, KEY_DISALLOWSLEEPDS8, 0, CONFIGFILENAME) != 0);
+	CSimpleIniA ini;
+
+	SI_Error rc = ini.LoadFile(CONFIGFILENAME);
+	if (rc < 0) { return false; }
+	
+	setSyncAudio(ini.GetBoolValue(SECTION_GENERAL, KEY_SYNCAUDIO, false));
+	setForceSync(ini.GetBoolValue(SECTION_GENERAL, KEY_FORCESYNC, false));
+	setAIEmulation(ini.GetBoolValue(SECTION_GENERAL, KEY_AIEMULATION, false));
+	setVolume(ini.GetLongValue(SECTION_GENERAL, KEY_VOLUME, 0));
+	setDriver((SoundDriverType)ini.GetLongValue(SECTION_GENERAL, KEY_DRIVER, (long)SND_DRIVER_DS8));
+	setBufferLevel(ini.GetLongValue(SECTION_GENERAL, KEY_BUFFERLEVEL, 3));
+	setBufferFPS(ini.GetLongValue(SECTION_GENERAL, KEY_BUFFERFPS, 45));
+	setBackendFPS(ini.GetLongValue(SECTION_GENERAL, KEY_BACKENDFPS, 90));
+	setDisallowSleepXA2(ini.GetBoolValue(SECTION_GENERAL, KEY_DISALLOWSLEEPXA2, false));
+	setDisallowSleepDS8(ini.GetBoolValue(SECTION_GENERAL, KEY_DISALLOWSLEEPDS8, false));
 	return true;
 }
 
@@ -85,16 +92,21 @@ bool Configuration::config_load_rom()
 
 	sprintf(CRC_Entry, "%08X-%08X-C:%02X", Header->crc1, Header->crc2, Header->countrycode);
 
-	setSyncAudio(GetPrivateProfileInt(CRC_Entry, KEY_SYNCAUDIO, getSyncAudio(), CONFIGFILENAME) != 0);
-	setForceSync(GetPrivateProfileInt(CRC_Entry, KEY_FORCESYNC, getForceSync(), CONFIGFILENAME) != 0);
-	setAIEmulation(GetPrivateProfileInt(CRC_Entry, KEY_AIEMULATION, getAIEmulation(), CONFIGFILENAME) != 0);
-	setVolume(GetPrivateProfileInt(CRC_Entry, KEY_VOLUME, getVolume(), CONFIGFILENAME));
-	setDriver((SoundDriverType)GetPrivateProfileInt(CRC_Entry, KEY_DRIVER, getDriver(), CONFIGFILENAME));
-	setBufferLevel(GetPrivateProfileInt(CRC_Entry, KEY_BUFFERLEVEL, getBufferLevel(), CONFIGFILENAME));
-	setBufferFPS(GetPrivateProfileInt(CRC_Entry, KEY_BUFFERFPS, getBufferFPS(), CONFIGFILENAME));
-	setBackendFPS(GetPrivateProfileInt(CRC_Entry, KEY_BACKENDFPS, getBackendFPS(), CONFIGFILENAME));
-	setDisallowSleepXA2(GetPrivateProfileInt(CRC_Entry, KEY_DISALLOWSLEEPXA2, getDisallowSleepXA2(), CONFIGFILENAME) != 0);
-	setDisallowSleepDS8(GetPrivateProfileInt(CRC_Entry, KEY_DISALLOWSLEEPDS8, getDisallowSleepDS8(), CONFIGFILENAME) != 0);
+	CSimpleIniA ini;
+
+	SI_Error rc = ini.LoadFile(CONFIGFILENAME);
+	if (rc < 0) { return false; }
+	
+	setSyncAudio(ini.GetBoolValue(CRC_Entry, KEY_SYNCAUDIO, getSyncAudio()));
+	setForceSync(ini.GetBoolValue(CRC_Entry, KEY_FORCESYNC, getForceSync()));
+	setAIEmulation(ini.GetBoolValue(CRC_Entry, KEY_AIEMULATION, getAIEmulation()));
+	setVolume(ini.GetLongValue(CRC_Entry, KEY_VOLUME, getVolume()));
+	setDriver((SoundDriverType)ini.GetLongValue(CRC_Entry, KEY_DRIVER, getDriver()));
+	setBufferLevel(ini.GetLongValue(CRC_Entry, KEY_BUFFERLEVEL, getBufferLevel()));
+	setBufferFPS(ini.GetLongValue(CRC_Entry, KEY_BUFFERFPS, getBufferFPS()));
+	setBackendFPS(ini.GetLongValue(CRC_Entry, KEY_BACKENDFPS, getBackendFPS()));
+	setDisallowSleepXA2(ini.GetBoolValue(CRC_Entry, KEY_DISALLOWSLEEPXA2, getDisallowSleepXA2()));
+	setDisallowSleepDS8(ini.GetBoolValue(CRC_Entry, KEY_DISALLOWSLEEPDS8, getDisallowSleepDS8()));
 	return true;
 }
 
@@ -113,37 +125,27 @@ void Configuration::LoadSettings()
 
 bool  Configuration::config_save()
 {
-	char temp[32];
+	CSimpleIniA ini;
 
-	sprintf(temp, "%i", getSyncAudio());
-	WritePrivateProfileString(SECTION_GENERAL, KEY_SYNCAUDIO, temp, CONFIGFILENAME);
+	SI_Error rc = ini.LoadFile(CONFIGFILENAME);
+	if (rc < 0) { ini.Reset(); }
 
-	sprintf(temp, "%i", getForceSync());
-	WritePrivateProfileString(SECTION_GENERAL, KEY_FORCESYNC, temp, CONFIGFILENAME);
+	ini.SetLongValue(SECTION_GENERAL, KEY_SYNCAUDIO, getSyncAudio());
+	ini.SetLongValue(SECTION_GENERAL, KEY_FORCESYNC, getForceSync());
+	ini.SetLongValue(SECTION_GENERAL, KEY_AIEMULATION, getAIEmulation());
+	ini.SetLongValue(SECTION_GENERAL, KEY_VOLUME, getVolume());
+	ini.SetLongValue(SECTION_GENERAL, KEY_DRIVER, getDriver());
+	ini.SetLongValue(SECTION_GENERAL, KEY_BUFFERLEVEL, getBufferLevel());
+	ini.SetLongValue(SECTION_GENERAL, KEY_BUFFERFPS, getBufferFPS());
+	ini.SetLongValue(SECTION_GENERAL, KEY_BACKENDFPS, getBackendFPS());
+	ini.SetLongValue(SECTION_GENERAL, KEY_DISALLOWSLEEPXA2, getDisallowSleepXA2());
+	ini.SetLongValue(SECTION_GENERAL, KEY_DISALLOWSLEEPDS8, getDisallowSleepDS8());
 
-	sprintf(temp, "%i", getAIEmulation());
-	WritePrivateProfileString(SECTION_GENERAL, KEY_AIEMULATION, temp, CONFIGFILENAME);
+	rc = ini.SaveFile(CONFIGFILENAME);
+	if (rc < 0)
+		return FALSE;
 
-	sprintf(temp, "%li", getVolume());
-	WritePrivateProfileString(SECTION_GENERAL, KEY_VOLUME, temp, CONFIGFILENAME);
-
-	sprintf(temp, "%i", (int32_t)getDriver());
-	WritePrivateProfileString(SECTION_GENERAL, KEY_DRIVER, temp, CONFIGFILENAME);
-
-	sprintf(temp, "%li", getBufferLevel());
-	WritePrivateProfileString(SECTION_GENERAL, KEY_BUFFERLEVEL, temp, CONFIGFILENAME);
-
-	sprintf(temp, "%li", getBufferFPS());
-	WritePrivateProfileString(SECTION_GENERAL, KEY_BUFFERFPS, temp, CONFIGFILENAME);
-
-	sprintf(temp, "%li", getBackendFPS());
-	WritePrivateProfileString(SECTION_GENERAL, KEY_BACKENDFPS, temp, CONFIGFILENAME);
-
-	sprintf(temp, "%i", getDisallowSleepXA2());
-	WritePrivateProfileString(SECTION_GENERAL, KEY_DISALLOWSLEEPXA2, temp, CONFIGFILENAME);
-
-	sprintf(temp, "%i", getDisallowSleepDS8());
-	WritePrivateProfileString(SECTION_GENERAL, KEY_DISALLOWSLEEPDS8, temp, CONFIGFILENAME);
+	assert(rc == SI_OK);
 
 	return TRUE;
 }
@@ -157,39 +159,27 @@ bool Configuration::config_save_rom()
 	for (int i = 0; i < 32; i++)
 		temp[i] = Header->name[i ^ 3];
 
-	temp[32] = 0;
+	CSimpleIniA ini;
 
-	WritePrivateProfileString(CRC_Entry, KEY_INTNAME, temp, CONFIGFILENAME);
+	SI_Error rc = ini.LoadFile(CONFIGFILENAME);
+	if (rc < 0) { ini.Reset(); }
 
-	sprintf(temp, "%i", getSyncAudio());
-	WritePrivateProfileString(CRC_Entry, KEY_SYNCAUDIO, temp, CONFIGFILENAME);
+	ini.SetLongValue(CRC_Entry, KEY_SYNCAUDIO, getSyncAudio());
+	ini.SetLongValue(CRC_Entry, KEY_FORCESYNC, getForceSync());
+	ini.SetLongValue(CRC_Entry, KEY_AIEMULATION, getAIEmulation());
+	ini.SetLongValue(CRC_Entry, KEY_VOLUME, getVolume());
+	ini.SetLongValue(CRC_Entry, KEY_DRIVER, getDriver());
+	ini.SetLongValue(CRC_Entry, KEY_BUFFERLEVEL, getBufferLevel());
+	ini.SetLongValue(CRC_Entry, KEY_BUFFERFPS, getBufferFPS());
+	ini.SetLongValue(CRC_Entry, KEY_BACKENDFPS, getBackendFPS());
+	ini.SetLongValue(CRC_Entry, KEY_DISALLOWSLEEPXA2, getDisallowSleepXA2());
+	ini.SetLongValue(CRC_Entry, KEY_DISALLOWSLEEPDS8, getDisallowSleepDS8());
 
-	sprintf(temp, "%i", getForceSync());
-	WritePrivateProfileString(CRC_Entry, KEY_FORCESYNC, temp, CONFIGFILENAME);
+	rc = ini.SaveFile(CONFIGFILENAME);
+	if (rc < 0)
+		return FALSE;
 
-	sprintf(temp, "%i", getAIEmulation());
-	WritePrivateProfileString(CRC_Entry, KEY_AIEMULATION, temp, CONFIGFILENAME);
-
-	sprintf(temp, "%li", getVolume());
-	WritePrivateProfileString(CRC_Entry, KEY_VOLUME, temp, CONFIGFILENAME);
-
-	sprintf(temp, "%i", (int32_t)getDriver());
-	WritePrivateProfileString(CRC_Entry, KEY_DRIVER, temp, CONFIGFILENAME);
-
-	sprintf(temp, "%li", getBufferLevel());
-	WritePrivateProfileString(CRC_Entry, KEY_BUFFERLEVEL, temp, CONFIGFILENAME);
-
-	sprintf(temp, "%li", getBufferFPS());
-	WritePrivateProfileString(CRC_Entry, KEY_BUFFERFPS, temp, CONFIGFILENAME);
-
-	sprintf(temp, "%li", getBackendFPS());
-	WritePrivateProfileString(CRC_Entry, KEY_BACKENDFPS, temp, CONFIGFILENAME);
-
-	sprintf(temp, "%i", getDisallowSleepXA2());
-	WritePrivateProfileString(CRC_Entry, KEY_DISALLOWSLEEPXA2, temp, CONFIGFILENAME);
-
-	sprintf(temp, "%i", getDisallowSleepDS8());
-	WritePrivateProfileString(CRC_Entry, KEY_DISALLOWSLEEPDS8, temp, CONFIGFILENAME);
+	assert(rc == SI_OK);
 
 	return TRUE;
 }

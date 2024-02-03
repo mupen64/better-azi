@@ -27,29 +27,29 @@ int ConfigTestDefaults(std::string& failureResult)
 
 static const char* ConfigTestSaveINI =\
 "[DEFAULT_SETTINGS]\r\n"
-"SyncAudio=0\r\n"
-"ForceSync=0\r\n"
-"AIEmulation=1\r\n"
-"Volume=0\r\n"
-"Driver=4097\r\n"
-"BufferLevel=3\r\n"
-"BufferFPS=45\r\n"
-"BackendFPS=90\r\n"
-"DisallowSleepXA2=0\r\n"
-"DisallowSleepDS8=0\r\n";
+"SyncAudio = 0\r\n"
+"ForceSync = 0\r\n"
+"AIEmulation = 1\r\n"
+"Volume = 0\r\n"
+"Driver = 4097\r\n"
+"BufferLevel = 3\r\n"
+"BufferFPS = 45\r\n"
+"BackendFPS = 90\r\n"
+"DisallowSleepXA2 = 0\r\n"
+"DisallowSleepDS8 = 0\r\n";
 
 static const char* ConfigTestSaveINIModded =\
 "[DEFAULT_SETTINGS]\r\n"
-"SyncAudio=1\r\n"
-"ForceSync=1\r\n"
-"AIEmulation=0\r\n"
-"Volume=50\r\n"
-"Driver=4099\r\n"
-"BufferLevel=6\r\n"
-"BufferFPS=48\r\n"
-"BackendFPS=98\r\n"
-"DisallowSleepXA2=0\r\n"
-"DisallowSleepDS8=1\r\n";
+"SyncAudio = 1\r\n"
+"ForceSync = 1\r\n"
+"AIEmulation = 0\r\n"
+"Volume = 50\r\n"
+"Driver = 4099\r\n"
+"BufferLevel = 6\r\n"
+"BufferFPS = 48\r\n"
+"BackendFPS = 98\r\n"
+"DisallowSleepXA2 = 0\r\n"
+"DisallowSleepDS8 = 1\r\n";
 
 static const char* ConfigTestLoadINI =\
 "[DEFAULT_SETTINGS]\r\n"
