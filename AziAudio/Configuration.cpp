@@ -159,21 +159,24 @@ bool Configuration::config_save_rom()
 	for (int i = 0; i < 32; i++)
 		temp[i] = Header->name[i ^ 3];
 
+	temp[32] = 0;
+
 	CSimpleIniA ini;
 
 	SI_Error rc = ini.LoadFile(CONFIGFILENAME);
 	if (rc < 0) { ini.Reset(); }
 
+	ini.SetValue(CRC_Entry, KEY_INTNAME, temp);
 	ini.SetLongValue(CRC_Entry, KEY_SYNCAUDIO, getSyncAudio());
 	ini.SetLongValue(CRC_Entry, KEY_FORCESYNC, getForceSync());
 	ini.SetLongValue(CRC_Entry, KEY_AIEMULATION, getAIEmulation());
-	ini.SetLongValue(CRC_Entry, KEY_VOLUME, getVolume());
-	ini.SetLongValue(CRC_Entry, KEY_DRIVER, getDriver());
+	//ini.SetLongValue(CRC_Entry, KEY_VOLUME, getVolume());
+	//ini.SetLongValue(CRC_Entry, KEY_DRIVER, getDriver());
 	ini.SetLongValue(CRC_Entry, KEY_BUFFERLEVEL, getBufferLevel());
 	ini.SetLongValue(CRC_Entry, KEY_BUFFERFPS, getBufferFPS());
 	ini.SetLongValue(CRC_Entry, KEY_BACKENDFPS, getBackendFPS());
-	ini.SetLongValue(CRC_Entry, KEY_DISALLOWSLEEPXA2, getDisallowSleepXA2());
-	ini.SetLongValue(CRC_Entry, KEY_DISALLOWSLEEPDS8, getDisallowSleepDS8());
+	//ini.SetLongValue(CRC_Entry, KEY_DISALLOWSLEEPXA2, getDisallowSleepXA2());
+	//ini.SetLongValue(CRC_Entry, KEY_DISALLOWSLEEPDS8, getDisallowSleepDS8());
 
 	rc = ini.SaveFile(CONFIGFILENAME);
 	if (rc < 0)
