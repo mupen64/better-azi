@@ -28,8 +28,8 @@
 	#undef __in
 	#undef __out
 	#include <ios>
+    void RedirectIOToConsole();
 	#endif
-	using namespace std;
 #endif
 
 SoundDriverInterface *snd = NULL;
@@ -40,11 +40,8 @@ bool first_time = true;
 
 void SetTimerResolution(void);
 
-#ifdef USE_PRINTF
-  void RedirectIOToConsole();
-#endif
-
 HINSTANCE hInstance;
+OSVERSIONINFOEX OSInfo;
 
 #ifdef __GNUC__
 extern "C"
@@ -100,19 +97,25 @@ AUDIO_INFO AudioInfo;
 u32 Dacrate = 0;
 
 EXPORT Boolean CALL InitiateAudio(AUDIO_INFO Audio_Info) {
-	Configuration::LoadSettings();
 	if (snd != NULL)
 	{
 		snd->AI_Shutdown();
 		delete snd;
 	}
 
-/*#ifdef USE_PRINTF
+#ifdef USE_PRINTF
 	RedirectIOToConsole();
 	DEBUG_OUTPUT("Logging to console enabled...\n");
 #endif
-	Dacrate = 0;
-	//CloseDLL ();*/
+#ifdef _WIN32
+    ZeroMemory(&OSInfo, sizeof(OSVERSIONINFOEX));
+    OSInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+    GetVersionEx((LPOSVERSIONINFO)&OSInfo);
+	DEBUG_OUTPUT("%04X %04X\n", _WIN32_WINNT, WINVER);
+	DEBUG_OUTPUT("Windows %li.%li  Build %li, Platform: %li\n", OSInfo.dwMajorVersion, OSInfo.dwMinorVersion, OSInfo.dwBuildNumber, OSInfo.dwPlatformId);
+#endif
+	//Dacrate = 0;
+	//CloseDLL ();
 
 	if (Configuration::getResTimer() == true)
 	{
@@ -126,6 +129,7 @@ EXPORT Boolean CALL InitiateAudio(AUDIO_INFO Audio_Info) {
 
 	Configuration::Header = (t_romheader*)Audio_Info.HEADER;
 	Configuration::LoadDefaults();
+	Configuration::LoadSettings();
 	snd = SoundDriverFactory::CreateSoundDriver(Configuration::getDriver());
 
 	if (snd == NULL)
@@ -327,7 +331,8 @@ void RedirectIOToConsole() {
 	FreeConsole();
 	if (!AllocConsole())
 		return;
-	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
+	*stdout = *freopen("CONOUT$", "w", stdout);
+	//freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
 	//// set the screen buffer to be big enough to let us scroll text
 	//GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &coninfo);
 	//coninfo.dwSize.Y = MAX_CONSOLE_LINES;
@@ -352,7 +357,7 @@ void RedirectIOToConsole() {
 	//setvbuf(stderr, NULL, _IONBF, 0);
 	//// make cout, wcout, cin, wcin, wcerr, cerr, wclog and clog 
 	//// point to console as well
-	//ios::sync_with_stdio();
+	// std::ios::sync_with_stdio();
 	
 #endif
 }

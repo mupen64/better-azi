@@ -9,6 +9,7 @@
 #### Debug location ####
 PJ64LDIR=$(HOME)/emu/Project64
 PJ64LEXE=run.sh
+TEST_CASE_EXE=tests.exe
 
 #### Compiler and tool definitions shared by all build targets #####
 # Cfg
@@ -37,7 +38,7 @@ BUILD_PREFIX = i686-w64-mingw32-
 CC = $(BUILD_PREFIX)gcc
 CXX = $(BUILD_PREFIX)g++
 WINDRES = $(BUILD_PREFIX)windres
-COMMON_FLAGS = -msse2 -DSSE2_SUPPORT -mstackrealign -I"3rd Party/directx/include" -I"3rd Party" -Wall -Wno-attributes -Wno-unknown-pragmas
+COMMON_FLAGS = -msse2 -DSSE2_SUPPORT -mstackrealign -I"3rd Party/directx/include" -I"3rd Party" -Wall -Wno-attributes -Wno-unknown-pragmas # -D_WIN32_WINNT=0x0501 -DWINVER=0x0501
 CFLAGS = $(BASICOPTS) $(COMMON_FLAGS)
 CXXFLAGS = $(BASICOPTS) $(COMMON_FLAGS) $(CPPFLAGS)
 LDFLAGS = -static-libstdc++ -static-libgcc -static -lole32 -lcomctl32 -lwinmm -ldsound -lksuser
@@ -50,8 +51,16 @@ OBJDIR=$(BINDIR)/$(BUILD_TYPE)_$(BUILD_ARCH)
 all: $(BINDIR)/$(PLUGIN_FILE)
 	cp "$(BINDIR)/$(PLUGIN_FILE)" "$(PJ64LDIR)/Plugin/$(PLUGIN_FILE)"
 
+test: $(BINDIR)/$(TEST_CASE_EXE)
+	cd $(BINDIR) && wine $(TEST_CASE_EXE)
+
 run: all
 	cd $(PJ64LDIR) && $(PJ64LDIR)/$(PJ64LEXE)
+
+TEST_OBJS = \
+	$(OBJDIR)/tests/testmain.o \
+	$(OBJDIR)/tests/configtests.o
+
 
 COMMON_OBJS =  \
 	$(OBJDIR)/WaveOut.o \
@@ -86,8 +95,13 @@ COMMON_OBJS =  \
 	$(OBJDIR)/resource.o
 
 # Link or archive
+$(BINDIR)/$(TEST_CASE_EXE): ALL_DIRS $(XA_OBJS) $(COMMON_OBJS) $(TEST_OBJS)
+	$(CXX) -mconsole $(CXXFLAGS) $(CPPFLAGS) -o $@ $(COMMON_OBJS) $(TEST_OBJS) $(LDFLAGS)
+
+# Link or archive
 $(BINDIR)/$(PLUGIN_FILE): ALL_DIRS $(XA_OBJS) $(COMMON_OBJS)
 	$(CXX) -shared $(CXXFLAGS) $(CPPFLAGS) -o $@ $(COMMON_OBJS) $(LDFLAGS)
+
 
 # Compile source files into .o files
 
@@ -105,7 +119,10 @@ $(OBJDIR)/%.o: AziAudio/%.rc
 
 .PHONY: ALL_DIRS
 
-ALL_DIRS: $(BINDIR) $(OBJDIR) $(OBJDIR)/Mupen64plusHLE 
+ALL_DIRS: $(BINDIR) $(OBJDIR) $(OBJDIR)/Mupen64plusHLE $(OBJDIR)/tests
+
+$(OBJDIR)/tests:
+	mkdir -p $@
 
 $(OBJDIR)/Mupen64plusHLE:
 	mkdir -p $@
@@ -120,3 +137,4 @@ $(BINDIR):
 clean:
 	rm -rf $(BINDIR)
 	rm -f $(COMMON_OBJS)
+	rm -f $(TEST_OBJS)
