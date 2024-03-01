@@ -29,6 +29,7 @@ bool WaveOutSoundDriver::ClassRegistered = ValidateDriver() ?
 */
 bool WaveOutSoundDriver::ValidateDriver()
 {
+	return true;
 	// This should be available in all versions of Windows in the last 25 years
 	WAVEOUTCAPS caps;
 	waveOutGetDevCaps(WAVE_MAPPER, &caps, sizeof(WAVEOUTCAPS));

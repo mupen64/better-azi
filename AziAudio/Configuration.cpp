@@ -77,7 +77,7 @@ bool Configuration::config_load()
 	setForceSync(ini.GetBoolValue(SECTION_GENERAL, KEY_FORCESYNC, false));
 	setAIEmulation(ini.GetBoolValue(SECTION_GENERAL, KEY_AIEMULATION, false));
 	setVolume(ini.GetLongValue(SECTION_GENERAL, KEY_VOLUME, 0));
-	setDriver((SoundDriverType)ini.GetLongValue(SECTION_GENERAL, KEY_DRIVER, (long)SND_DRIVER_DS8));
+	setDriver((SoundDriverType)ini.GetLongValue(SECTION_GENERAL, KEY_DRIVER, (long)SoundDriverFactory::DefaultDriver()));
 	setBufferLevel(ini.GetLongValue(SECTION_GENERAL, KEY_BUFFERLEVEL, 3));
 	setBufferFPS(ini.GetLongValue(SECTION_GENERAL, KEY_BUFFERFPS, 45));
 	setBackendFPS(ini.GetLongValue(SECTION_GENERAL, KEY_BACKENDFPS, 90));
@@ -225,7 +225,7 @@ void Configuration::LoadDefaults()
 	setForceSync(false);
 	setAIEmulation(true);
 	setVolume(0);
-	setDriver(SND_DRIVER_DS8);
+	setDriver(SoundDriverFactory::DefaultDriver());
 	setBufferLevel(3);
 	setBufferFPS(45);
 	setBackendFPS(90);
