@@ -42,9 +42,10 @@ static VoiceCallbackLegacy voiceCallback;
 
 bool XAudio2SoundDriverLegacy::ValidateDriver()
 {
+	return true;
 	bool retVal = false;
 	/* Validate an XAudio2 2.7 object will initialize */
-	CoInitializeEx(NULL, COINIT_MULTITHREADED);
+	CoInitialize(NULL);
 	const GUID CLSID_XAudio2_Test = { 0x5a508685, 0xa254, 0x4fba, 0x9b, 0x82, 0x9a, 0x24, 0xb0, 0x03, 0x06, 0xaf };
 	const GUID IID_IXAudio2_Test = { 0x8bcf1f58, 0x9fe7, 0x4583, 0x8a, 0xc6, 0xe2, 0xad, 0xc4, 0x65, 0xc8, 0xbb };
 	IUnknown* obj;
@@ -66,7 +67,7 @@ XAudio2SoundDriverLegacy::XAudio2SoundDriverLegacy()
 	g_source = NULL;
 	g_master = NULL;
 	dllInitialized = false;
-	CoInitializeEx(NULL, COINIT_MULTITHREADED);
+	CoInitialize(NULL);
 }
 
 
