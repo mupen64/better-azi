@@ -71,7 +71,11 @@ bool Configuration::config_load()
 	CSimpleIniA ini;
 
 	SI_Error rc = ini.LoadFile(CONFIGFILENAME);
-	if (rc < 0) { return false; }
+	if (rc < 0) { 
+		LoadDefaults(); 
+		config_save(); 
+		return false; 
+	}
 	
 	setSyncAudio(ini.GetBoolValue(SECTION_GENERAL, KEY_SYNCAUDIO, false));
 	setForceSync(ini.GetBoolValue(SECTION_GENERAL, KEY_FORCESYNC, false));
@@ -100,13 +104,13 @@ bool Configuration::config_load_rom()
 	setSyncAudio(ini.GetBoolValue(CRC_Entry, KEY_SYNCAUDIO, getSyncAudio()));
 	setForceSync(ini.GetBoolValue(CRC_Entry, KEY_FORCESYNC, getForceSync()));
 	setAIEmulation(ini.GetBoolValue(CRC_Entry, KEY_AIEMULATION, getAIEmulation()));
-	setVolume(ini.GetLongValue(CRC_Entry, KEY_VOLUME, getVolume()));
-	setDriver((SoundDriverType)ini.GetLongValue(CRC_Entry, KEY_DRIVER, getDriver()));
+	setVolume(ini.GetLongValue(SECTION_GENERAL, KEY_VOLUME, getVolume()));
+	setDriver((SoundDriverType)ini.GetLongValue(SECTION_GENERAL, KEY_DRIVER, getDriver()));
 	setBufferLevel(ini.GetLongValue(CRC_Entry, KEY_BUFFERLEVEL, getBufferLevel()));
 	setBufferFPS(ini.GetLongValue(CRC_Entry, KEY_BUFFERFPS, getBufferFPS()));
 	setBackendFPS(ini.GetLongValue(CRC_Entry, KEY_BACKENDFPS, getBackendFPS()));
-	setDisallowSleepXA2(ini.GetBoolValue(CRC_Entry, KEY_DISALLOWSLEEPXA2, getDisallowSleepXA2()));
-	setDisallowSleepDS8(ini.GetBoolValue(CRC_Entry, KEY_DISALLOWSLEEPDS8, getDisallowSleepDS8()));
+	setDisallowSleepXA2(ini.GetBoolValue(SECTION_GENERAL, KEY_DISALLOWSLEEPXA2, getDisallowSleepXA2()));
+	setDisallowSleepDS8(ini.GetBoolValue(SECTION_GENERAL, KEY_DISALLOWSLEEPDS8, getDisallowSleepDS8()));
 	return true;
 }
 
@@ -120,7 +124,6 @@ void Configuration::LoadSettings()
 		snd->SetVolume(Configuration::configVolume);
 
 	return;
-
 }
 
 bool  Configuration::config_save()
@@ -170,13 +173,13 @@ bool Configuration::config_save_rom()
 	ini.SetLongValue(CRC_Entry, KEY_SYNCAUDIO, getSyncAudio());
 	ini.SetLongValue(CRC_Entry, KEY_FORCESYNC, getForceSync());
 	ini.SetLongValue(CRC_Entry, KEY_AIEMULATION, getAIEmulation());
-	//ini.SetLongValue(CRC_Entry, KEY_VOLUME, getVolume());
-	//ini.SetLongValue(CRC_Entry, KEY_DRIVER, getDriver());
+	ini.SetLongValue(SECTION_GENERAL, KEY_VOLUME, getVolume());
+	ini.SetLongValue(SECTION_GENERAL, KEY_DRIVER, getDriver());
 	ini.SetLongValue(CRC_Entry, KEY_BUFFERLEVEL, getBufferLevel());
 	ini.SetLongValue(CRC_Entry, KEY_BUFFERFPS, getBufferFPS());
 	ini.SetLongValue(CRC_Entry, KEY_BACKENDFPS, getBackendFPS());
-	//ini.SetLongValue(CRC_Entry, KEY_DISALLOWSLEEPXA2, getDisallowSleepXA2());
-	//ini.SetLongValue(CRC_Entry, KEY_DISALLOWSLEEPDS8, getDisallowSleepDS8());
+	ini.SetLongValue(SECTION_GENERAL, KEY_DISALLOWSLEEPXA2, getDisallowSleepXA2());
+	ini.SetLongValue(SECTION_GENERAL, KEY_DISALLOWSLEEPDS8, getDisallowSleepDS8());
 
 	rc = ini.SaveFile(CONFIGFILENAME);
 	if (rc < 0)
