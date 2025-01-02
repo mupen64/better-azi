@@ -273,7 +273,7 @@ void Configuration::ConfigDialog(HWND hParent)
 
 	memset(&psh, 0, sizeof(PROPSHEETHEADER));
 	psh.dwSize = sizeof(PROPSHEETHEADER);
-	psh.dwFlags = PSH_PROPSHEETPAGE;
+	psh.dwFlags = PSH_PROPSHEETPAGE | PSH_NOAPPLYNOW;
 	psh.hwndParent = hParent;
 	psh.hInstance = hInstance;
 	psh.pszCaption = "Audio Options";
