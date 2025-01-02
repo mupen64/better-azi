@@ -290,7 +290,7 @@ void Configuration::ConfigDialog(HWND hParent)
 void Configuration::AboutDialog(HWND hParent)
 {
 #define ABOUTMESSAGE \
-	PLUGIN_VERSION\
+	PLUGIN_FULL_NAME\
 	"\nby Azimer\n"\
 	"\nHome: https://www.project64-legacy.com/\n"\
 	"Source: https://github.com/pj64team/Project64-Legacy\n"\

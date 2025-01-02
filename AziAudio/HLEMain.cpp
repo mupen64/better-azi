@@ -100,7 +100,7 @@ void SPNOOP() {
 	*(sprintf_offset + 1) = '0' + (command / 1 % 10);
 	if (sprintf_offset[0] == '0')
 		sprintf_offset[0] = ' '; /* Leading 0's may confuse decimal w/ octal. */
-	MessageBox(NULL, buff, PLUGIN_VERSION, MB_OK);
+	MessageBox(NULL, buff, PLUGIN_FULL_NAME, MB_OK);
 #endif
 }
 

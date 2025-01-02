@@ -64,7 +64,7 @@ EXPORT void CALL DllAbout(HWND hParent) {
 #if defined(_WIN32) || defined(_XBOX)
 	Configuration::AboutDialog(hParent);
 #else
-	puts(PLUGIN_VERSION);
+	puts(PLUGIN_FULL_NAME);
 #endif
 }
 
@@ -153,7 +153,7 @@ EXPORT void CALL CloseDLL(void) {
 EXPORT void CALL GetDllInfo(PLUGIN_INFO * PluginInfo) {
 	PluginInfo->MemoryBswaped = TRUE;
 	PluginInfo->NormalMemory  = FALSE;
-	safe_strcpy(PluginInfo->Name, 100, PLUGIN_VERSION);
+	safe_strcpy(PluginInfo->Name, 100, PLUGIN_FULL_NAME);
 	PluginInfo->Type = PLUGIN_TYPE_AUDIO;
 	PluginInfo->Version = 0x0101; // Set this to retain backwards compatibility
 }

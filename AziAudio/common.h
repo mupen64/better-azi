@@ -98,36 +98,25 @@ extern rSettings RegSettings;
 #define HLECODE   1
 #define CPUCODE   2
 
-#define PLUGIN_NAME     "Legacy Audio"
+#define PLUGIN_NAME     "AziAudio"
 
-#ifdef DEVBUILD
 #ifdef __GNUC__
-#define PLUGIN_BUILDSYS "Mingw"
+#define PLUGIN_BUILDSYS " Mingw"
 #else
-#define PLUGIN_BUILDSYS "MSVC"
+#define PLUGIN_BUILDSYS " MSVC"
 #endif
+
 #ifdef _DEBUG
-#define PLUGIN_DEBUG " (" PLUGIN_BUILDSYS " Debug)"
-#else
-#define PLUGIN_DEBUG " (" PLUGIN_BUILDSYS ")"
-#endif
-#else
-#ifdef _DEBUG
-#define PLUGIN_DEBUG " (Debug r59)"
+#define PLUGIN_DEBUG " Debug"
 #else
 #define PLUGIN_DEBUG ""
 #endif
-#endif
 
-#define PLUGIN_RELEASE " v0.70.10c"
+#define PLUGIN_RELEASE " v0.7.1"
 #define PLUGIN_BUILD  \
 	   PLUGIN_DEBUG 
 
-#define PLUGIN_VERSION \
-"Azimer's " \
-PLUGIN_NAME \
-PLUGIN_RELEASE \
-PLUGIN_BUILD
+#define PLUGIN_FULL_NAME PLUGIN_NAME PLUGIN_RELEASE PLUGIN_BUILDSYS
 
 
 #ifdef ENABLEPROFILING
