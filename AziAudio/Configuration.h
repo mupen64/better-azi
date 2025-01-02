@@ -46,7 +46,7 @@ typedef struct
 	u8  unknown10;        /* 0x3f */
 } t_romheader;
 
-#define CONFIGFILENAME			"Config\\AzimersLegacyAudio.ini"
+#define CONFIGFILENAME			"AzimersLegacyAudio.ini"
 
 #define KEY_INTNAME				"INTERNAL_NAME"
 #define KEY_SYNCAUDIO			"SyncAudio"
