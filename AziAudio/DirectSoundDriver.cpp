@@ -446,14 +446,14 @@ void DirectSoundDriver::StopAudio() {
 	if (this->handleAudioThread != NULL)
 	{
 		int sleepCnt = 0;
-		while (this->threadRunning == true && sleepCnt++ < 100)
-			Sleep(1);
-		if (this->threadRunning == true)
+
+		if (WaitForSingleObjectEx(this->handleAudioThread, 1000, false) != WAIT_OBJECT_0) 
 		{
 			DEBUG_OUTPUT("DS8: Unsafe Thread Termination\n");
 			TerminateThread(this->handleAudioThread, 0);
-			this->threadRunning = false;
 		}
+
+		this->threadRunning = false;
 	}
 	this->handleAudioThread = NULL;
 	DEBUG_OUTPUT("DS8: StopAudio() complete\n");
