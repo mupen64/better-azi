@@ -102,7 +102,6 @@ BEGIN
     GROUPBOX        "Output Device",IDC_STATIC,19,20,180,28
     COMBOBOX        IDC_BACKEND,29,63,165,132,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     GROUPBOX        "Backend Sound Driver",IDC_STATIC,21,53,180,28
-    LTEXT           "Caution: Changing waveOut driver volume changes application volume for all drivers.",IDC_STATIC,25,84,139,17
 END
 
 IDD_PROPPAGE_ADVANCED DIALOGEX 0, 0, 373, 150

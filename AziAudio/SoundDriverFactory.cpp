@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 #include "SoundDriverFactory.h"
-#include "NoSoundDriver.h"
 
 int SoundDriverFactory::FactoryNextSlot = 0;
 SoundDriverFactory::FactoryDriversStruct SoundDriverFactory::FactoryDrivers[MAX_FACTORY_DRIVERS];
@@ -31,50 +30,8 @@ SoundDriverInterface* SoundDriverFactory::CreateSoundDriver(SoundDriverType Driv
 
         I think for now I am happy where things are unless we see issues.  I have a lot of other things to do so it will stay disabled for now.
     */
-#if 0 
-	SoundDriverType drivers[MAX_FACTORY_DRIVERS];
-	int index[MAX_FACTORY_DRIVERS];
-	bool sorted = false;
 
-	if (result == NULL)
-	{
-		// *** Start failover ***
-		// Copy the drivers
-		for (int x = 0; x < FactoryNextSlot; x++)
-		{
-			drivers[x] = FactoryDrivers[x].DriverType;
-			index[x] = x;
-		}
-
-		// Sort on priority -- Highest priority is likely best API for the system
-		while (sorted == false)
-		{
-			sorted = true;
-			for (int x = 0; x < FactoryNextSlot - 1; x++)
-			{
-				if (FactoryDrivers[index[x]].Priority <
-					FactoryDrivers[index[x + 1]].Priority)
-				{
-					int i;
-					i = index[x];
-					index[x] = index[x + 1];
-					index[x + 1] = i;
-					sorted = false;
-				}
-			}
-		}
-
-		// Return the first one that doesn't fail to initialize
-		for (int x = 0; x < FactoryNextSlot; x++)
-		{
-			result = FactoryDrivers[index[x]].CreateFunction();
-			if (result != NULL)
-				break;
-		}
-	}
-#endif
-    if (result == NULL)
-        result = new NoSoundDriver();
+    assert(result);
 
     return result;
 }

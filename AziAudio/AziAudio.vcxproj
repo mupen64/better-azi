@@ -70,7 +70,6 @@
         <ClInclude Include="common.h"/>
         <ClInclude Include="Configuration.h"/>
         <ClInclude Include="DirectSoundDriver.h"/>
-        <ClInclude Include="DirectSoundDriverLegacy.h"/>
         <ClInclude Include="Mupen64plusHLE\arithmetics.h"/>
         <ClInclude Include="Mupen64plusHLE\audio.h"/>
         <ClInclude Include="Mupen64plusHLE\common.h"/>
@@ -80,18 +79,14 @@
         <ClInclude Include="Mupen64plusHLE\memory.h"/>
         <ClInclude Include="Mupen64plusHLE\ucodes.h"/>
         <ClInclude Include="my_types.h"/>
-        <ClInclude Include="NoSoundDriver.h"/>
         <ClInclude Include="resource.h"/>
         <ClInclude Include="Settings.h"/>
         <ClInclude Include="SoundDriver.h"/>
         <ClInclude Include="SoundDriverFactory.h"/>
         <ClInclude Include="SoundDriverInterface.h"/>
         <ClInclude Include="SoundDriverLegacy.h"/>
-        <ClInclude Include="WASAPISoundDriver.h"/>
         <ClInclude Include="WaveOut.h"/>
-        <ClInclude Include="WaveOutSoundDriver.h"/>
         <ClInclude Include="XAudio2SoundDriver.h"/>
-        <ClInclude Include="XAudio2SoundDriverLegacy.h"/>
     </ItemGroup>
     <ItemGroup>
         <ClCompile Include="ABI1.cpp"/>
@@ -106,23 +101,18 @@
         <ClCompile Include="ABI_Resample.cpp"/>
         <ClCompile Include="Configuration.cpp"/>
         <ClCompile Include="DirectSoundDriver.cpp"/>
-        <ClCompile Include="DirectSoundDriverLegacy.cpp"/>
         <ClCompile Include="HLEMain.cpp"/>
         <ClCompile Include="main.cpp"/>
         <ClCompile Include="Mupen64plusHLE\audio.c"/>
         <ClCompile Include="Mupen64plusHLE\memory.c"/>
         <ClCompile Include="Mupen64plusHLE\Mupen64Support.c"/>
         <ClCompile Include="Mupen64plusHLE\musyx.c"/>
-        <ClCompile Include="NoSoundDriver.cpp"/>
         <ClCompile Include="SoundDriver.cpp"/>
         <ClCompile Include="SoundDriverFactory.cpp"/>
         <ClCompile Include="SoundDriverInterface.cpp"/>
         <ClCompile Include="SoundDriverLegacy.cpp"/>
-        <ClCompile Include="WASAPISoundDriver.cpp"/>
         <ClCompile Include="WaveOut.cpp"/>
-        <ClCompile Include="WaveOutSoundDriver.cpp"/>
         <ClCompile Include="XAudio2SoundDriver.cpp"/>
-        <ClCompile Include="XAudio2SoundDriverLegacy.cpp"/>
     </ItemGroup>
     <ItemGroup>
         <Reference Include="System"/>
