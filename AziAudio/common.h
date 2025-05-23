@@ -98,25 +98,21 @@ extern rSettings RegSettings;
 #define HLECODE   1
 #define CPUCODE   2
 
-#define PLUGIN_NAME     "AziAudio"
+#define PLUGIN_VERSION "1.7.1"
 
-#ifdef __GNUC__
-#define PLUGIN_BUILDSYS " Mingw"
+#ifdef _M_X64
+#define PLUGIN_ARCH " x64"
 #else
-#define PLUGIN_BUILDSYS " MSVC"
+#define PLUGIN_ARCH " x86"
 #endif
 
 #ifdef _DEBUG
-#define PLUGIN_DEBUG " Debug"
+#define PLUGIN_TARGET " Debug"
 #else
-#define PLUGIN_DEBUG ""
+#define PLUGIN_TARGET " Release"
 #endif
 
-#define PLUGIN_RELEASE " v0.7.1"
-#define PLUGIN_BUILD  \
-	   PLUGIN_DEBUG 
-
-#define PLUGIN_FULL_NAME PLUGIN_NAME PLUGIN_RELEASE PLUGIN_BUILDSYS
+#define PLUGIN_FULL_NAME "BetterAzi " PLUGIN_VERSION PLUGIN_ARCH PLUGIN_TARGET
 
 
 #ifdef ENABLEPROFILING
