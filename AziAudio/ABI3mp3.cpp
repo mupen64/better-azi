@@ -21,7 +21,7 @@ u32 setaddr;
 
 void MP3ADDY()
 {
-    setaddr = (t9 & 0xffffff);
+    setaddr = t9 & 0xffffff;
     // assert(0);
     // fprintf (fp, "mp3addy: k0: %08X, t9: %08X, loopval: %08X\n", k0, t9, loopval);
 }
@@ -69,7 +69,7 @@ s32 CalcDeWindow(u32 addptr, u32 offset)
     product =
     (s32) * (s16*)(mp3data + addptr) * (s32)(s16)DeWindowLUT[offset];
     product = (product + 0x4000) >> 15; /* single-precision fraction rounding */
-    return (product);
+    return product;
 }
 
 // ** Store v[vIndex] -> (mp3DataIndex)**
@@ -116,7 +116,7 @@ void MP3()
 
     t6 = 0x08A0; // I think these are temporary storage buffers
     t5 = 0x0AC0;
-    t4 = (k0 & 0x1E);
+    t4 = k0 & 0x1E;
 
     writePtr = t9 & 0xFFFFFF;
     readPtr = writePtr;
@@ -136,7 +136,7 @@ void MP3()
             t6 |= t4;
             t5 |= t4;
             InnerLoop();
-            t4 = (t4 - 2) & 0x1E;
+            t4 = t4 - 2 & 0x1E;
             tmp = t6;
             t6 = t5;
             t5 = tmp;
@@ -156,11 +156,11 @@ void InnerLoop()
     int i;
 
     for (i = 0; i < 16; i++)
-        v[i] = GetData(2 * (i ^ (i / 2) ^ (i / 4) ^ (i / 8)));
+        v[i] = GetData(2 * (i ^ i / 2 ^ i / 4 ^ i / 8));
     for (i = 16; i < 32; i++)
         v[i] = GetData(2 * i);
     for (i = 0; i < 16; i++)
-        v[i] += v[(31 - i) ^ (i / 2) ^ (i / 4) ^ (i / 8)];
+        v[i] += v[31 - i ^ i / 2 ^ i / 4 ^ i / 8];
 
     // Part 2-4
     MP3AB0();
@@ -226,7 +226,7 @@ void InnerLoop()
     v[14] = v[30] + v[31];
     v[3] = v[8] + v[10];
     v[14] = v[14] + v[14];
-    v[13] = (v[13] - v[2]) + v[12];
+    v[13] = v[13] - v[2] + v[12];
     v[15] = (((v[30] - v[31]) * 0x5A827) >> 0x10) - (v[11] + v[2]);
     v[14] = -(v[14] + v[14]) + v[3];
     v[17] = v[13] - v[10];
@@ -247,11 +247,11 @@ void InnerLoop()
 
     // Part 6 - 100% Accurate
     for (i = 0; i < 16; i++)
-        v[i] = GetData(2 * (i ^ (i / 2) ^ (i / 4) ^ (i / 8)));
+        v[i] = GetData(2 * (i ^ i / 2 ^ i / 4 ^ i / 8));
     for (i = 16; i < 32; i++)
         v[i] = GetData(2 * i);
     for (i = 0; i < 16; i++)
-        v[i] -= v[(31 - i) ^ (i / 2) ^ (i / 4) ^ (i / 8)];
+        v[i] -= v[31 - i ^ i / 2 ^ i / 4 ^ i / 8];
 
     // 0, 1, 3, 2, 7, 6, 4, 5, 7, 6, 4, 5, 0, 1, 3, 2
     const u16 LUT6[16] = {
@@ -286,17 +286,17 @@ void InnerLoop()
     // Part 7: - 100% Accurate + SSV - Unoptimized
     v[0] = (v[17] + v[16]) >> 1;
     // v[1] = ((v[17] * (int)((s16)0xA57E * 2)) + (v[16] * 0xB504)) >> 0x10; -- Azimer : Made 0xA57E negative to remove truncate warning
-    v[1] = ((v[17] * (int)((s16)-0x5A82 * 2)) + (v[16] * 0xB504)) >> 0x10; // Should B504 also be s16 like the above?
+    v[1] = (v[17] * (int)((s16)-0x5A82 * 2) + v[16] * 0xB504) >> 0x10; // Should B504 also be s16 like the above?
     v[2] = -v[18] - v[19];
     v[3] = ((v[18] - v[19]) * 0x16A09) >> 0x10;
     v[4] = v[20] + v[21] + v[0];
     v[5] = (((v[20] - v[21]) * 0x16A09) >> 0x10) + v[1];
-    v[6] = (((v[22] + v[23]) << 1) + v[0]) - v[2];
+    v[6] = ((v[22] + v[23]) << 1) + v[0] - v[2];
     v[7] = (((v[22] - v[23]) * 0x2D413) >> 0x10) + v[0] + v[1] + v[3];
     // 0x16A8
     // Save v[0] -> (T3 + 0xFFE0)
     //*(s16 *)(mp3data + ((t3 + (s16)0xFFE0))) = (s16)-v[0]; -- Azimer : Made 0xA57E negative to remove truncate warning
-    *(s16*)(mp3data + ((t3 + (s16)-0x0020))) = (s16)-v[0];
+    *(s16*)(mp3data + (t3 + (s16)-0x0020)) = (s16)-v[0];
     v[8] = v[24] + v[25];
     v[9] = ((v[24] - v[25]) * 0x16A09) >> 0x10;
     v[10] = ((v[26] + v[27]) << 1) + v[8];
@@ -339,7 +339,7 @@ void InnerLoop()
     v[13] = v[13] + v[2];
     rsp_SH(13, -0x020, t0);
     // v[2] = ;
-    v[2] = (v[5] - v[2]) - v[9];
+    v[2] = v[5] - v[2] - v[9];
     rsp_SH(2, -0x060, t0);
     // 0x7A8 - Verified...
 
@@ -411,7 +411,7 @@ void InnerLoop()
     {
         v2 = v4 = v6 = v8 = 0;
 
-        offset = (0x22F - (t4 >> 1) + x * 0x40);
+        offset = 0x22F - (t4 >> 1) + x * 0x40;
 
         for (i = 0; i < 4; i++)
             v2 += CalcDeWindow(addptr + 0 + 0x20 + 4 * i, offset + 0x00 + 2 * i);

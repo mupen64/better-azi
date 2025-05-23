@@ -12,8 +12,8 @@ are both passed to the DLL in InitiateAudio will generate an Interrupt from with
 the plugin.
 
 **********************************************************************************/
-#ifndef _AUDIO_H_INCLUDED__
-#define _AUDIO_H_INCLUDED__
+
+#pragma once
 
 #include "common.h"
 #include "my_types.h"
@@ -209,8 +209,6 @@ EXPORT void CALL RomClosed(void);
 EXPORT void CALL RomOpen(void);
 EXPORT void CALL PluginLoaded(void);
 
-EXPORT void CALL AiCallBack(void);
-
 extern AUDIO_INFO AudioInfo;
 
 void HLEStart();
@@ -220,10 +218,7 @@ void ChangeABI(int type); /* type 0 = SafeMode */
 #define AI_STATUS_DMA_BUSY 0x40000000 /* Bit 30: busy */
 #define MI_INTR_AI 0x04 /* Bit 2: AI intr */
 #define AI_CONTROL_DMA_ON 0x01
-#define AI_CONTROL_DMA_OFF 0x00
 
 #if defined(__cplusplus)
 }
-#endif
-
 #endif

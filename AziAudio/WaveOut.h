@@ -6,9 +6,6 @@
 
 #pragma once
 #include <cstdio>
-#if defined(_WIN32)
-#include <windows.h>
-#endif
 
 typedef struct
 {

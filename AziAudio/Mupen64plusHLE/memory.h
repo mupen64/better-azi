@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-#ifndef MEMORY_H
-#define MEMORY_H
+#pragma once
 
 #include <assert.h>
 #include <stddef.h>
@@ -42,24 +41,24 @@ enum {
     TASK_YIELD_DATA_SIZE = 0xffc
 };
 
-static inline unsigned int align(unsigned int x, unsigned amount)
+static unsigned int align(unsigned int x, unsigned amount)
 {
     --amount;
-    return (x + amount) & ~amount;
+    return x + amount & ~amount;
 }
 
-static inline uint8_t* pt_u8(const unsigned char* buffer, unsigned address)
+static uint8_t* pt_u8(const unsigned char* buffer, unsigned address)
 {
     return (uint8_t*)(buffer + (address ^ S8));
 }
 
-static inline uint16_t* pt_u16(const unsigned char* buffer, unsigned address)
+static uint16_t* pt_u16(const unsigned char* buffer, unsigned address)
 {
     assert((address & 1) == 0);
     return (uint16_t*)(buffer + (address ^ S16));
 }
 
-static inline uint32_t* pt_u32(const unsigned char* buffer, unsigned address)
+static uint32_t* pt_u32(const unsigned char* buffer, unsigned address)
 {
     assert((address & 3) == 0);
     return (uint32_t*)(buffer + address);
@@ -74,45 +73,43 @@ void store_u32(unsigned char* buffer, unsigned address, const uint32_t* src, siz
 
 
 /* convenient function for DMEM access */
-static inline uint32_t* dmem_u32(struct hle_t* hle, uint16_t address)
+static uint32_t* dmem_u32(struct hle_t* hle, uint16_t address)
 {
     return pt_u32(hle->dmem, address & 0xfff);
 }
 
 /* convenient functions for DRAM access */
-static inline uint8_t* dram_u8(struct hle_t* hle, uint32_t address)
+static uint8_t* dram_u8(struct hle_t* hle, uint32_t address)
 {
     return pt_u8(hle->dram, address & 0xffffff);
 }
 
-static inline uint16_t* dram_u16(struct hle_t* hle, uint32_t address)
+static uint16_t* dram_u16(struct hle_t* hle, uint32_t address)
 {
     return pt_u16(hle->dram, address & 0xffffff);
 }
 
-static inline uint32_t* dram_u32(struct hle_t* hle, uint32_t address)
+static uint32_t* dram_u32(struct hle_t* hle, uint32_t address)
 {
     return pt_u32(hle->dram, address & 0xffffff);
 }
 
-static inline void dram_load_u8(struct hle_t* hle, uint8_t* dst, uint32_t address, size_t count)
+static void dram_load_u8(struct hle_t* hle, uint8_t* dst, uint32_t address, size_t count)
 {
     load_u8(dst, hle->dram, address & 0xffffff, count);
 }
 
-static inline void dram_load_u16(struct hle_t* hle, uint16_t* dst, uint32_t address, size_t count)
+static void dram_load_u16(struct hle_t* hle, uint16_t* dst, uint32_t address, size_t count)
 {
     load_u16(dst, hle->dram, address & 0xffffff, count);
 }
 
-static inline void dram_load_u32(struct hle_t* hle, uint32_t* dst, uint32_t address, size_t count)
+static void dram_load_u32(struct hle_t* hle, uint32_t* dst, uint32_t address, size_t count)
 {
     load_u32(dst, hle->dram, address & 0xffffff, count);
 }
 
-static inline void dram_store_u16(struct hle_t* hle, const uint16_t* src, uint32_t address, size_t count)
+static void dram_store_u16(struct hle_t* hle, const uint16_t* src, uint32_t address, size_t count)
 {
     store_u16(hle->dram, address & 0xffffff, src, count);
 }
-
-#endif

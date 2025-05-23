@@ -41,7 +41,7 @@ void load_u8(uint8_t* dst, const unsigned char* buffer, unsigned address, size_t
 {
     while (count != 0)
     {
-        *(dst++) = *pt_u8(buffer, address);
+        *dst++ = *pt_u8(buffer, address);
         address += 1;
         --count;
     }
@@ -51,7 +51,7 @@ void load_u16(uint16_t* dst, const unsigned char* buffer, unsigned address, size
 {
     while (count != 0)
     {
-        *(dst++) = *pt_u16(buffer, address);
+        *dst++ = *pt_u16(buffer, address);
         address += 2;
         --count;
     }
@@ -67,7 +67,7 @@ void store_u8(unsigned char* buffer, unsigned address, const uint8_t* src, size_
 {
     while (count != 0)
     {
-        *pt_u8(buffer, address) = *(src++);
+        *pt_u8(buffer, address) = *src++;
         address += 1;
         --count;
     }
@@ -77,7 +77,7 @@ void store_u16(unsigned char* buffer, unsigned address, const uint16_t* src, siz
 {
     while (count != 0)
     {
-        *pt_u16(buffer, address) = *(src++);
+        *pt_u16(buffer, address) = *src++;
         address += 2;
         --count;
     }

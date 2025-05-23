@@ -137,7 +137,7 @@ void HLEStart()
     // Detect uCode
     if (((u32*)UData)[0] != 0x1)
     {
-        switch (*(u32*)(UData + (0x10)))
+        switch (*(u32*)(UData + 0x10))
         {
         case 0x00000001: // MusyX v1
             // RogueSquadron, ResidentEvil2, PolarisSnoCross,
@@ -163,9 +163,9 @@ void HLEStart()
     }
     else
     {
-        if (*(u32*)(UData + (0x30)) == 0xF0000F00)
+        if (*(u32*)(UData + 0x30) == 0xF0000F00)
         { // Should be common in ABI 1
-            switch (*(u32*)(UData + (0x28)))
+            switch (*(u32*)(UData + 0x28))
             {
             case 0x1e24138c:
                 memcpy(ABI, ABI1, NUM_ABI_COMMANDS * sizeof(p_func));
@@ -182,7 +182,7 @@ void HLEStart()
         }
         else
         {
-            switch (*(u32*)(UData + (0x10))) // ABI2 and MusyX
+            switch (*(u32*)(UData + 0x10)) // ABI2 and MusyX
             {
             case 0x00010010: // MusyX v2 (IndianaJones, BattleForNaboo)
                 ProcessMusyX_v2();
@@ -254,7 +254,7 @@ void HLEStart()
 
         k0 = HLEPtr[x + 0];
         t9 = HLEPtr[x + 1];
-        command = (unsigned char)((k0 >> 24) & 0xFF);
+        command = (unsigned char)(k0 >> 24 & 0xFF);
 #if 0
 		assert(command == command % NUM_ABI_COMMANDS);
 		command %= NUM_ABI_COMMANDS;
@@ -310,7 +310,7 @@ INLINE s32 sats_over(s32 slice)
     s32 adder, mask;
 
     adder = +32767 - slice;
-    mask = ((s32)adder >> 31); /* if (+32767 - x < 0 */
+    mask = (s32)adder >> 31; /* if (+32767 - x < 0 */
     mask &= ~((s32)slice >> 31); /*  && x >= 0) */
     adder &= mask;
     return (s32)(slice + adder); /* slice + (+32767 - slice) == +32767 */
@@ -326,8 +326,8 @@ INLINE s32 sats_under(s32 slice)
     s32 adder, mask;
 
     adder = +32768 + slice;
-    mask = ((s32)adder >> 31); /* if (x + 32768 < 0 */
-    mask &= ((s32)slice >> 31); /*  && x < 0) */
+    mask = (s32)adder >> 31; /* if (x + 32768 < 0 */
+    mask &= (s32)slice >> 31; /*  && x < 0) */
     adder &= mask;
     return (s32)(slice - adder); /* slice - (slice + 32768) == -32768 */
 #else

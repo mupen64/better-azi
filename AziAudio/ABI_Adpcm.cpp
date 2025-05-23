@@ -174,9 +174,9 @@ void ADPCM_madd(s32* a, s16* book1, s16* book2, s16 l1, s16 l2, s16* inp)
 
 void ADPCM()
 { // Work in progress! :)
-    u8 Flags = (u8)((k0 >> 16) & 0xff);
+    u8 Flags = (u8)(k0 >> 16 & 0xff);
     // u16 Gain = (u16)(k0 & 0xffff);
-    u32 Address = (t9 & 0xffffff); // + SEGMENTS[(t9>>24)&0xf];
+    u32 Address = t9 & 0xffffff; // + SEGMENTS[(t9>>24)&0xf];
     u16 inPtr = 0;
     // s16 *out=(s16 *)(testbuff+(AudioOutBuffer>>2));
     s16* out = (s16*)(BufferSpace + AudioOutBuffer);
@@ -228,12 +228,12 @@ void ADPCM()
 #if 0
 		assert((12 - code) - 1 >= 0);
 #endif
-        vscale = 0x8000u >> ((12 - code) - 1); // very strange. 0x8000 would be .5 in 16:16 format
+        vscale = 0x8000u >> (12 - code - 1); // very strange. 0x8000 would be .5 in 16:16 format
         // so this appears to be a fractional scale based
         // on the 12 based inverse of the scale value.  note
         // that this could be negative, in which case we do
         // not use the calculated vscale value...
-        if ((12 - code) - 1 < 0)
+        if (12 - code - 1 < 0)
             vscale = 0x10000; /* null operation:  << 16 then >> 16 */
         inPtr++; // coded adpcm data lies next
         for (int i = 0; i < 8; i += 2) // loop of 8, for 8 coded nibbles from 4 bytes
@@ -282,9 +282,9 @@ void ADPCM()
 
 void ADPCM2()
 { // Verified to be 100% Accurate...
-    u8 Flags = (u8)((k0 >> 16) & 0xff);
+    u8 Flags = (u8)(k0 >> 16 & 0xff);
     //	u16 Gain = (u16)(k0 & 0xffff);
-    u32 Address = (t9 & 0xffffff); // + SEGMENTS[(t9>>24)&0xf];
+    u32 Address = t9 & 0xffffff; // + SEGMENTS[(t9>>24)&0xf];
     u16 inPtr = 0;
     // s16 *out=(s16 *)(testbuff+(AudioOutBuffer>>2));
     s16* out = (s16*)(BufferSpace + AudioOutBuffer);
@@ -345,8 +345,8 @@ void ADPCM2()
 #if 0
 		assert((srange - code) - 1 >= 0);
 #endif
-        vscale = 0x8000u >> ((srange - code) - 1);
-        if ((srange - code) - 1 < 0)
+        vscale = 0x8000u >> (srange - code - 1);
+        if (srange - code - 1 < 0)
             vscale = 0x10000; /* null operation:  << 16 then >> 16 */
         inPtr++;
 
@@ -412,14 +412,14 @@ void ADPCM2()
 
 void ADPCM3()
 { // Verified to be 100% Accurate...
-    u8 Flags = (u8)((t9 >> 0x1c) & 0xff);
+    u8 Flags = (u8)(t9 >> 0x1c & 0xff);
     // u16 Gain=(u16)(k0&0xffff);
-    u32 Address = (k0 & 0xffffff); // + SEGMENTS[(t9>>24)&0xf];
-    u16 inPtr = (t9 >> 12) & 0xf;
+    u32 Address = k0 & 0xffffff; // + SEGMENTS[(t9>>24)&0xf];
+    u16 inPtr = t9 >> 12 & 0xf;
     // s16 *out=(s16 *)(testbuff+(AudioOutBuffer>>2));
     s16* out = (s16*)(BufferSpace + (t9 & 0xfff) + 0x4f0);
     //	u8 *in = (u8 *)(BufferSpace + ((t9 >> 12) & 0xf) + 0x4f0);
-    s16 count = (s16)((t9 >> 16) & 0xfff);
+    s16 count = (s16)(t9 >> 16 & 0xfff);
     int vscale;
     u16 index;
     s32 a[8];
@@ -456,12 +456,12 @@ void ADPCM3()
         book2 = book1 + 8;
         code >>= 4; // upper nibble is scale
 
-        vscale = 0x8000u >> ((12 - code) - 1); // very strange. 0x8000 would be .5 in 16:16 format
+        vscale = 0x8000u >> (12 - code - 1); // very strange. 0x8000 would be .5 in 16:16 format
         // so this appears to be a fractional scale based
         // on the 12 based inverse of the scale value.  note
         // that this could be negative, in which case we do
         // not use the calculated vscale value...
-        if ((12 - code) - 1 < 0)
+        if (12 - code - 1 < 0)
             vscale = 0x10000; /* null operation:  << 16 then >> 16 */
 
         inPtr++; // coded adpcm data lies next
@@ -514,7 +514,7 @@ void LOADADPCM()
     u32 v0;
     size_t i, limit;
 
-    v0 = (t9 & 0xffffff); // + SEGMENTS[(t9>>24)&0xf];
+    v0 = t9 & 0xffffff; // + SEGMENTS[(t9>>24)&0xf];
     //	if (v0 > (1024*1024*8))
     //		v0 = (t9 & 0xffffff);
     //	memcpy (dmem+0x4c0, rdram+v0, k0&0xffff); // Could prolly get away with not putting this in dmem
@@ -531,7 +531,7 @@ void LOADADPCM2()
     u32 v0;
     size_t i, limit;
 
-    v0 = (t9 & 0xffffff); // + SEGMENTS[(t9>>24)&0xf];
+    v0 = t9 & 0xffffff; // + SEGMENTS[(t9>>24)&0xf];
     u16* table = (u16*)(DRAM + v0); // Zelda2 Specific...
 
     limit = (k0 & 0x0000FFFF) >> 4;
@@ -544,7 +544,7 @@ void LOADADPCM3()
     u32 v0;
     size_t i, limit;
 
-    v0 = (t9 & 0xffffff);
+    v0 = t9 & 0xffffff;
     // memcpy (dmem+0x3f0, rdram+v0, k0&0xffff);
     // assert ((k0&0xffff) <= 0x80);
     u16* table = (u16*)(DRAM + v0);

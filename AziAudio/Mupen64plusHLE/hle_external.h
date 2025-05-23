@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-#ifndef HLE_EXTERNAL_H
-#define HLE_EXTERNAL_H
+#pragma once
 
 /* users of the hle core are expected to define these functions */
 
@@ -18,5 +17,3 @@ void HleProcessDlistList(void* user_defined);
 void HleProcessAlistList(void* user_defined);
 void HleProcessRdpList(void* user_defined);
 void HleShowCFB(void* user_defined);
-
-#endif

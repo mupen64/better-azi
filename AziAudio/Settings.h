@@ -5,7 +5,6 @@
  */
 
 #pragma once
-#include "common.h"
 
 class Settings {
 public:

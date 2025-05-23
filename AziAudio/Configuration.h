@@ -6,13 +6,9 @@
 
 #pragma once
 
-// #include "common.h"
+#include "common.h"
 #include "Settings.h"
-#ifdef _WIN32
 #include <windows.h>
-#endif
-
-/* strcpy() */
 #include <string.h>
 
 typedef struct
@@ -42,38 +38,20 @@ typedef struct
     u8 unknown10; /* 0x3f */
 } t_romheader;
 
-#define CONFIGFILENAME "AzimersLegacyAudio.ini"
-
-#define KEY_INTNAME "INTERNAL_NAME"
-#define KEY_SYNCAUDIO "SyncAudio"
-#define KEY_FORCESYNC "ForceSync"
-#define KEY_AIEMULATION "AIEmulation"
-#define KEY_VOLUME "Volume"
-#define KEY_DRIVER "Driver"
-#define KEY_BUFFERLEVEL "BufferLevel"
-#define KEY_BUFFERFPS "BufferFPS"
-#define KEY_BACKENDFPS "BackendFPS"
-#define KEY_DISALLOWSLEEPXA2 "DisallowSleepXA2"
-#define KEY_DISALLOWSLEEPDS8 "DisallowSleepDS8"
-
-#define SECTION_GENERAL "DEFAULT_SETTINGS"
-
 class Configuration {
 protected:
     static const int MAX_FOLDER_LENGTH = 500;
     static const int MAX_DEVICE_LENGTH = 100;
-#ifdef _WIN32
+
     static INT_PTR CALLBACK ConfigProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
     static INT_PTR CALLBACK AdvancedProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
     static INT_PTR CALLBACK SettingsProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
-#endif
+
     static unsigned long configVolume;
     static char configAudioLogFolder[MAX_FOLDER_LENGTH];
-    // static LPGUID configDevice;
     static SoundDriverType configDriver;
     static Settings currentSettings;
 
-    // Setters
     static void setAIEmulation(bool value) { currentSettings.configAIEmulation = value; }
     static void setSyncAudio(bool value) { currentSettings.configSyncAudio = value; }
     static void setForceSync(bool value) { currentSettings.configForceSync = value; }
@@ -100,11 +78,9 @@ public:
     static bool config_load_rom();
     static bool config_save();
     static bool config_save_rom();
-#ifdef _WIN32
     static void ConfigDialog(HWND hParent);
     static void AboutDialog(HWND hParent);
-#endif
-    // Accessors for the Configuration variables to prevent changes outside of Configuration.cpp
+
     static bool getAIEmulation() { return currentSettings.configAIEmulation; }
     static unsigned long getVolume() { return configVolume; }
     static bool getForceSync() { return currentSettings.configForceSync; }
@@ -125,7 +101,4 @@ public:
         strcpy(retVal, configAudioLogFolder);
         return retVal;
     }
-#if 0 /* Disable Device Configuration */
-	static LPGUID getDevice() { return configDevice; }
-#endif
 };

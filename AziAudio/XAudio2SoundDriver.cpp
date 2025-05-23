@@ -5,80 +5,48 @@
  */
 
 #include "common.h"
-#if defined(ENABLE_BACKEND_XAUDIO2)
 #include "XAudio2SoundDriver.h"
 #include "AudioSpec.h"
 #include <stdio.h>
 #include "SoundDriverFactory.h"
 
-bool XAudio2SoundDriver::ClassRegistered = ValidateDriver() ? SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_XA2, XAudio2SoundDriver::CreateSoundDriver, "XAudio2 Driver", 15) : false;
+bool XAudio2SoundDriver::ClassRegistered = SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_XA2, CreateSoundDriver, "XAudio2 Driver", 15);
 
 static IXAudio2* g_engine;
 static IXAudio2SourceVoice* g_source;
 static IXAudio2MasteringVoice* g_master;
-
 static bool audioIsPlaying = false;
 static bool canPlay = false;
-
 static u8 bufferData[4][44100 * 4];
 static int writeBuffer = 0;
 static int readBuffer = 0;
 static int filledBuffers;
 static int bufferBytes;
-// static int lastLength = 1;
-
 static int cacheSize = 0;
 static int interrupts = 0;
 static VoiceCallback voiceCallback;
-
-bool XAudio2SoundDriver::ValidateDriver()
-{
-    return true;
-    bool retVal = false;
-    /* Validate an XAudio2 2.7 object will initialize */
-    CoInitialize(NULL);
-    const GUID CLSID_XAudio2_Test = {0x5a508685, 0xa254, 0x4fba, 0x9b, 0x82, 0x9a, 0x24, 0xb0, 0x03, 0x06, 0xaf};
-    const GUID IID_IXAudio2_Test = {0x8bcf1f58, 0x9fe7, 0x4583, 0x8a, 0xc6, 0xe2, 0xad, 0xc4, 0x65, 0xc8, 0xbb};
-    IUnknown* obj;
-
-    HRESULT hr = CoCreateInstance(CLSID_XAudio2_Test,
-                                  NULL,
-                                  CLSCTX_INPROC_SERVER,
-                                  IID_IXAudio2_Test,
-                                  (void**)&obj);
-    if (SUCCEEDED(hr))
-    {
-        obj->Release();
-        retVal = true;
-    }
-    CoUninitialize();
-    return retVal;
-}
+static HANDLE hMutex;
 
 XAudio2SoundDriver::XAudio2SoundDriver()
 {
-    g_engine = NULL;
-    g_source = NULL;
-    g_master = NULL;
+    g_engine = nullptr;
+    g_source = nullptr;
+    g_master = nullptr;
     dllInitialized = false;
     bStopAudioThread = false;
-    hAudioThread = NULL;
-    CoInitialize(NULL);
+    hAudioThread = nullptr;
+    CoInitialize(nullptr);
 }
-
 
 XAudio2SoundDriver::~XAudio2SoundDriver()
 {
     DeInitialize();
-    // Teardown();
     CoUninitialize();
 }
-static HANDLE hMutex;
-
 
 BOOL XAudio2SoundDriver::Initialize()
 {
-    if (g_source != NULL)
+    if (g_source)
     {
         g_source->Start();
     }
@@ -98,8 +66,9 @@ BOOL XAudio2SoundDriver::Setup()
 {
     if (dllInitialized == true)
         return true;
+
     dllInitialized = true;
-    hAudioThread = NULL;
+    hAudioThread = nullptr;
     audioIsPlaying = false;
     writeBuffer = 0;
     readBuffer = 0;
@@ -110,27 +79,20 @@ BOOL XAudio2SoundDriver::Setup()
     cacheSize = 0;
     interrupts = 0;
 
-    hMutex = CreateMutex(NULL, FALSE, NULL);
+    hMutex = CreateMutex(nullptr, FALSE, nullptr);
     if (FAILED(XAudio2Create(&g_engine)))
     {
-        // CoUninitialize();
         return -1;
     }
 
     if (FAILED(g_engine->CreateMasteringVoice(&g_master)))
     {
         g_engine->Release();
-        // CoUninitialize();
         return -2;
     }
     canPlay = true;
 
-    // Load Wave File
-
-    WAVEFORMATEX wfm;
-
-    memset(&wfm, 0, sizeof(WAVEFORMATEX));
-
+    WAVEFORMATEX wfm = {0};
     wfm.wFormatTag = WAVE_FORMAT_PCM;
     wfm.nChannels = 2;
     wfm.nSamplesPerSec = 44100;
@@ -138,11 +100,9 @@ BOOL XAudio2SoundDriver::Setup()
     wfm.nBlockAlign = wfm.wBitsPerSample / 8 * wfm.nChannels;
     wfm.nAvgBytesPerSec = wfm.nSamplesPerSec * wfm.nBlockAlign;
 
-
     if (FAILED(g_engine->CreateSourceVoice(&g_source, &wfm, 0, XAUDIO2_DEFAULT_FREQ_RATIO, &voiceCallback, NULL, NULL)))
     {
         g_engine->Release();
-        // CoUninitialize();
         return -3;
     }
 
@@ -162,32 +122,32 @@ void XAudio2SoundDriver::Teardown()
         return;
     canPlay = false;
     StopAudioThread();
-    if (hMutex != NULL)
+    if (hMutex != nullptr)
         WaitForSingleObject(hMutex, INFINITE);
-    if (g_source != NULL)
+    if (g_source != nullptr)
     {
         g_source->Stop();
         g_source->FlushSourceBuffers();
-        if (hMutex != NULL)
+        if (hMutex != nullptr)
             ReleaseMutex(hMutex);
         g_source->DestroyVoice();
     }
-    if (g_master != NULL)
+    if (g_master != nullptr)
         g_master->DestroyVoice();
-    if (g_engine != NULL)
+    if (g_engine != nullptr)
     {
         g_engine->StopEngine();
         g_engine->Release();
     }
-    g_engine = NULL;
-    g_master = NULL;
-    g_source = NULL;
-    if (hMutex != NULL)
+    g_engine = nullptr;
+    g_master = nullptr;
+    g_source = nullptr;
+    if (hMutex != nullptr)
     {
         ReleaseMutex(hMutex);
         CloseHandle(hMutex);
     }
-    hMutex = NULL;
+    hMutex = nullptr;
     dllInitialized = false;
     canPlay = false;
 }
@@ -202,7 +162,7 @@ void XAudio2SoundDriver::PlayBuffer(u8* data, int bufferSize)
     xa2buff.LoopBegin = 0;
     xa2buff.LoopLength = 0;
     xa2buff.LoopCount = 0;
-    xa2buff.pContext = NULL;
+    xa2buff.pContext = nullptr;
     xa2buff.AudioBytes = bufferSize;
     xa2buff.pAudioData = data;
     if (canPlay)
@@ -218,7 +178,7 @@ void XAudio2SoundDriver::SetFrequency(u32 Frequency)
 {
     if (Setup() < 0) /* failed to apply a sound device */
         return;
-    cacheSize = (u32)((Frequency / Configuration::getBackendFPS())) * 4;
+    cacheSize = (u32)(Frequency / Configuration::getBackendFPS()) * 4;
     g_source->FlushSourceBuffers();
     g_source->SetSourceSampleRate(Frequency);
 
@@ -238,7 +198,7 @@ DWORD WINAPI XAudio2SoundDriver::AudioThreadProc(LPVOID lpParameter)
 
     while (driver->bStopAudioThread == false)
     {
-        if (g_source != NULL)
+        if (g_source)
         {
             XAUDIO2_VOICE_STATE xvs;
             g_source->GetState(&xvs);
@@ -261,7 +221,8 @@ DWORD WINAPI XAudio2SoundDriver::AudioThreadProc(LPVOID lpParameter)
                 g_source->GetState(&xvs);
             }
         }
-        if (Configuration::getDisallowSleepXA2() == false)
+
+        if (!Configuration::getDisallowSleepXA2())
             Sleep(1);
     }
     return 0;
@@ -269,18 +230,18 @@ DWORD WINAPI XAudio2SoundDriver::AudioThreadProc(LPVOID lpParameter)
 
 void XAudio2SoundDriver::StartAudioThread()
 {
-    if (hAudioThread == NULL && dllInitialized == true)
+    if (!hAudioThread && dllInitialized == true)
     {
-        DEBUG_OUTPUT("Audio Thread created\n");
+        DEBUG_OUTPUT "Audio Thread created\n";
         bStopAudioThread = false;
-        hAudioThread = CreateThread(NULL, 0, AudioThreadProc, this, 0, NULL);
+        hAudioThread = CreateThread(nullptr, 0, AudioThreadProc, this, 0, nullptr);
         assert(hAudioThread != NULL);
     }
 }
 
 void XAudio2SoundDriver::StopAudioThread()
 {
-    if (hAudioThread != NULL)
+    if (hAudioThread)
     {
         bStopAudioThread = true;
         DWORD result = WaitForSingleObject(hAudioThread, 5000);
@@ -288,18 +249,17 @@ void XAudio2SoundDriver::StopAudioThread()
         {
             TerminateThread(hAudioThread, 0);
         }
-        DEBUG_OUTPUT("Audio Thread terminated\n");
+        DEBUG_OUTPUT "Audio Thread terminated\n";
     }
-    hAudioThread = NULL;
+    hAudioThread = nullptr;
     bStopAudioThread = false;
 }
 
 void XAudio2SoundDriver::StopAudio()
 {
-
     audioIsPlaying = false;
     StopAudioThread();
-    if (g_source != NULL)
+    if (g_source)
     {
         g_source->Stop();
         g_source->FlushSourceBuffers();
@@ -312,23 +272,18 @@ void XAudio2SoundDriver::StartAudio()
     StartAudioThread();
 }
 
-// 100 - Mute to 0 - Full Volume
 void XAudio2SoundDriver::SetVolume(u32 volume)
 {
-    float xaVolume = 1.0f - ((float)volume / 100.0f);
-    if (g_source != NULL)
+    float xaVolume = 1.0f - (float)volume / 100.0f;
+    if (g_source)
         g_source->SetVolume(xaVolume);
-    // XAUDIO2_MAX_VOLUME_LEVEL
 }
 
 
 void __stdcall VoiceCallback::OnBufferEnd(void* pBufferContext)
 {
-    UNREFERENCED_PARAMETER(pBufferContext);
 }
 
 void __stdcall VoiceCallback::OnVoiceProcessingPassStart(UINT32 SamplesRequired)
 {
-    UNREFERENCED_PARAMETER(SamplesRequired);
 }
-#endif

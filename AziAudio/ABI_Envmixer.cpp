@@ -38,10 +38,10 @@ static inline s32 mixer_macc(s32* Acc, s32* AdderStart, s32* AdderEnd, s32 Ramp)
     /*** ... comes out to something not the same as the C code he commented. ***/
     volume = (*AdderEnd - *AdderStart) >> 3;
     *Acc = *AdderStart;
-    *AdderEnd = (s32)((((s64)(*AdderEnd) * (s64)Ramp) >> 16) & 0xFFFFFFFF);
-    *AdderStart = (s32)((((s64)(*Acc) * (s64)Ramp) >> 16) & 0xFFFFFFFF);
+    *AdderEnd = (s32)(((s64)*AdderEnd * (s64)Ramp) >> 16 & 0xFFFFFFFF);
+    *AdderStart = (s32)(((s64)*Acc * (s64)Ramp) >> 16 & 0xFFFFFFFF);
 #endif
-    return (volume);
+    return volume;
 }
 
 static u16 env[8];
@@ -53,7 +53,7 @@ void ENVSETUP1()
 
     // fprintf (dfile, "ENVSETUP1: k0 = %08X, t9 = %08X\n", k0, t9);
     t3 = (s16)(k0 & 0xFFFF);
-    tmp = ((k0 >> 0x8) & 0xFF00);
+    tmp = k0 >> 0x8 & 0xFF00;
     env[4] = (u16)tmp;
     tmp += t3;
     env[5] = (u16)tmp;
@@ -67,7 +67,7 @@ void ENVSETUP2()
     u16 tmp;
 
     // fprintf (dfile, "ENVSETUP2: k0 = %08X, t9 = %08X\n", k0, t9);
-    tmp = (t9 >> 0x10);
+    tmp = t9 >> 0x10;
     env[0] = (u16)tmp;
     tmp += s5;
     env[1] = (u16)tmp;
@@ -123,8 +123,8 @@ s16 GetVec(s16 vec, u16 envValue, s16 v2Value)
 void ENVMIXER()
 {
     // static int envmixcnt = 0;
-    u8 flags = (u8)((k0 >> 16) & 0xff);
-    u32 addy = (t9 & 0xFFFFFF); // + SEGMENTS[(t9>>24)&0xf];
+    u8 flags = (u8)(k0 >> 16 & 0xff);
+    u32 addy = t9 & 0xFFFFFF; // + SEGMENTS[(t9>>24)&0xf];
     // static
     //  ********* Make sure these conditions are met... ***********
     /*if ((AudioInBuffer | AudioOutBuffer | AudioAuxA | AudioAuxC | AudioAuxE | AudioCount) & 0x3) {
@@ -158,12 +158,12 @@ void ENVMIXER()
     // fprintf (dfile, "\n----------------------------------------------------\n");
     if (flags & A_INIT)
     {
-        LVol = ((Vol_Left * (s32)VolRamp_Left));
-        RVol = ((Vol_Right * (s32)VolRamp_Right));
+        LVol = Vol_Left * (s32)VolRamp_Left;
+        RVol = Vol_Right * (s32)VolRamp_Right;
         Wet = (s16)Env_Wet;
         Dry = (s16)Env_Dry; // Save Wet/Dry values
-        LTrg = (VolTrg_Left << 16);
-        RTrg = (VolTrg_Right << 16); // Save Current Left/Right Targets
+        LTrg = VolTrg_Left << 16;
+        RTrg = VolTrg_Right << 16; // Save Current Left/Right Targets
         LAdderStart = Vol_Left << 16;
         RAdderStart = Vol_Right << 16;
         LAdderEnd = LVol;
@@ -194,10 +194,10 @@ void ENVMIXER()
         aux2 = aux3 = zero;
     }
 
-    oMainL = MultQ15(Dry, (LTrg >> 16));
-    oAuxL = MultQ15(Wet, (LTrg >> 16));
-    oMainR = MultQ15(Dry, (RTrg >> 16));
-    oAuxR = MultQ15(Wet, (RTrg >> 16));
+    oMainL = MultQ15(Dry, LTrg >> 16);
+    oAuxL = MultQ15(Wet, LTrg >> 16);
+    oMainR = MultQ15(Dry, RTrg >> 16);
+    oAuxR = MultQ15(Wet, RTrg >> 16);
 
     for (int y = 0; y < AudioCount; y += 0x10)
     {
@@ -239,8 +239,8 @@ void ENVMIXER()
             }
             else
             {
-                MainL = MultQ15(Dry, ((s32)LAcc >> 16));
-                AuxL = MultQ15(Wet, ((s32)LAcc >> 16));
+                MainL = MultQ15(Dry, (s32)LAcc >> 16);
+                AuxL = MultQ15(Wet, (s32)LAcc >> 16);
             }
 
             RAcc += RVol;
@@ -253,8 +253,8 @@ void ENVMIXER()
             }
             else
             {
-                MainR = MultQ15(Dry, ((s32)RAcc >> 16));
-                AuxR = MultQ15(Wet, ((s32)RAcc >> 16));
+                MainR = MultQ15(Dry, (s32)RAcc >> 16);
+                AuxR = MultQ15(Wet, (s32)RAcc >> 16);
             }
 
             // fprintf (dfile, "%04X ", (LAcc>>16));
@@ -310,8 +310,8 @@ void ENVMIXER()
 
 void ENVMIXER_GE()
 {
-    u8 flags = (u8)((k0 >> 16) & 0xff);
-    u32 addy = (t9 & 0xFFFFFF); // + SEGMENTS[(t9>>24)&0xf];
+    u8 flags = (u8)(k0 >> 16 & 0xff);
+    u32 addy = t9 & 0xFFFFFF; // + SEGMENTS[(t9>>24)&0xf];
     s16* inp = LoadBufferSpace(AudioInBuffer);
     s16* out = LoadBufferSpace(AudioOutBuffer);
     s16* aux1 = LoadBufferSpace(AudioAuxA);
@@ -372,17 +372,17 @@ void ENVMIXER_GE()
         aux2 = aux3 = zero;
     }
 
-    for (int y = 0; y < (AudioCount / 2); y++)
+    for (int y = 0; y < AudioCount / 2; y++)
     {
 
         // Left
         LAcc += LAdder;
-        LVol += (LAcc >> 16);
+        LVol += LAcc >> 16;
         LAcc &= 0xFFFF;
 
         // Right
         RAcc += RAdder;
-        RVol += (RAcc >> 16);
+        RVol += RAcc >> 16;
         RAcc &= 0xFFFF;
         // ****************************************************************
         // Clamp Left
@@ -405,7 +405,7 @@ void ENVMIXER_GE()
         aux1[MES(y)] = pack_signed(aux1[MES(y)] + MultQ15((s16)i1, (s16)MainL));
 
         // ****************************************************************
-        if ((flags & A_AUX))
+        if (flags & A_AUX)
         {
             AuxL = MultQ15(Wet, (s16)(LVol & 0xFFFF));
             AuxR = MultQ15(Wet, (s16)(RVol & 0xFFFF));
@@ -447,19 +447,19 @@ void ENVMIXER2()
 
     // assert(0);
 
-    buffs3 = LoadBufferSpace(((k0 >> 0x0c) & 0x0ff0));
-    bufft6 = LoadBufferSpace(((t9 >> 0x14) & 0x0ff0));
-    bufft7 = LoadBufferSpace(((t9 >> 0x0c) & 0x0ff0));
-    buffs0 = LoadBufferSpace(((t9 >> 0x04) & 0x0ff0));
-    buffs1 = LoadBufferSpace(((t9 << 0x04) & 0x0ff0));
+    buffs3 = LoadBufferSpace(k0 >> 0x0c & 0x0ff0);
+    bufft6 = LoadBufferSpace(t9 >> 0x14 & 0x0ff0);
+    bufft7 = LoadBufferSpace(t9 >> 0x0c & 0x0ff0);
+    buffs0 = LoadBufferSpace(t9 >> 0x04 & 0x0ff0);
+    buffs1 = LoadBufferSpace(t9 << 0x04 & 0x0ff0);
 
 
     v2[0] = 0 - (s16)((k0 & 0x2) >> 1);
-    v2[1] = 0 - (s16)((k0 & 0x1));
+    v2[1] = 0 - (s16)(k0 & 0x1);
     v2[2] = 0 - (s16)((k0 & 0x8) >> 1);
     v2[3] = 0 - (s16)((k0 & 0x4) >> 1);
 
-    count = (k0 >> 8) & 0xff;
+    count = k0 >> 8 & 0xff;
 
     if (!isMKABI)
     {
@@ -534,8 +534,8 @@ void ENVMIXER2()
 
 void ENVMIXER3()
 {
-    u8 flags = (u8)((k0 >> 16) & 0xff);
-    u32 addy = (t9 & 0xFFFFFF);
+    u8 flags = (u8)(k0 >> 16 & 0xff);
+    u32 addy = t9 & 0xFFFFFF;
 
     s16* inp = LoadBufferSpace(0x4F0);
     s16* out = LoadBufferSpace(0x9D0);
@@ -599,17 +599,17 @@ void ENVMIXER3()
     //	aux2=aux3=zero;
     // }
 
-    for (int y = 0; y < (0x170 / 2); y++)
+    for (int y = 0; y < 0x170 / 2; y++)
     {
 
         // Left
         LAcc += LAdder;
-        LVol += (LAcc >> 16);
+        LVol += LAcc >> 16;
         LAcc &= 0xFFFF;
 
         // Right
         RAcc += RAdder;
-        RVol += (RAcc >> 16);
+        RVol += RAcc >> 16;
         RAcc &= 0xFFFF;
         // ****************************************************************
         // Clamp Left
@@ -659,12 +659,12 @@ void ENVMIXER3()
 
 void SETVOL()
 {
-    u8 flags = (u8)((k0 >> 16) & 0xff);
+    u8 flags = (u8)(k0 >> 16 & 0xff);
 
     if (flags & A_AUX)
     {
         Env_Dry = (s16)(k0 & 0xffff);
-        Env_Wet = (u16)((t9 & 0xffff));
+        Env_Wet = (u16)(t9 & 0xffff);
         return;
     }
     else if (flags & A_VOL) // Set the Source(start) Volumes
@@ -696,7 +696,7 @@ void SETVOL()
 
 void SETVOL3()
 {
-    u8 Flags = (u8)((k0 >> 0x10) & 0xFF);
+    u8 Flags = (u8)(k0 >> 0x10 & 0xFF);
     if (Flags & 0x4)
     { // 288
         if (Flags & 0x2)

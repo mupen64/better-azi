@@ -4,15 +4,12 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-#ifndef UCODES_H
-#define UCODES_H
+#pragma once
 
 struct hle_t;
 
-
 /* cic_x105 ucode */
 void cicx105_ucode(struct hle_t* hle);
-
 
 /* audio list ucodes - audio */
 enum {
@@ -126,5 +123,3 @@ void musyx_v2_task(struct hle_t* hle);
 void jpeg_decode_PS0(struct hle_t* hle);
 void jpeg_decode_PS(struct hle_t* hle);
 void jpeg_decode_OB(struct hle_t* hle);
-
-#endif

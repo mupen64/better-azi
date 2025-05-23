@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-#ifndef HLE_INTERNAL_H
-#define HLE_INTERNAL_H
+#pragma once
 
 #include "ucodes.h"
 
@@ -55,5 +54,3 @@ struct hle_t {
     /* mp3.c */
     uint8_t mp3_buffer[0x1000];
 };
-
-#endif

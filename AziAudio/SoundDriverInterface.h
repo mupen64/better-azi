@@ -8,7 +8,6 @@
 #include "common.h"
 #include "Configuration.h"
 
-
 class SoundDriverInterface {
 private:
 public:

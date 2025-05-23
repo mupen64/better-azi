@@ -34,7 +34,7 @@ static void packed_multiply_accumulate(i32* acc_in, i16* vs, i16* vt)
     for (i = 0; i < 8; i++)
         result += pre_buffer[i];
 #endif
-    *(acc_in) = result;
+    *acc_in = result;
     return;
 }
 
@@ -66,12 +66,11 @@ s32 rdot_ABI(size_t n, const s16* x, const s16* y)
 #else
     for (i = 0; i < 4; i++)
         accumulators[i] =
-        (x[2 * i + 0] * b[2 * i + 0]) +
-        (x[2 * i + 1] * b[2 * i + 1]);
+        x[2 * i + 0] * b[2 * i + 0] +
+        x[2 * i + 1] * b[2 * i + 1];
 #endif
-    return (
-    accumulators[0] + accumulators[1] +
-    accumulators[2] + accumulators[3]);
+    return accumulators[0] + accumulators[1] +
+    accumulators[2] + accumulators[3];
 }
 
 void FILTER2()
@@ -81,11 +80,11 @@ void FILTER2()
     static s16* lutt6;
     static s16* lutt5;
     u8* save = DRAM + (t9 & 0xFFFFFF);
-    u8 t4 = (u8)((k0 >> 0x10) & 0xFF);
+    u8 t4 = (u8)(k0 >> 0x10 & 0xFF);
 
     if (t4 > 1)
     { // Then set the cnt variable
-        cnt = (k0 & 0xFFFF);
+        cnt = k0 & 0xFFFF;
         lutt6 = (s16*)save;
         //				memcpy (dmem+0xFE0, rdram+(t9&0xFFFFFF), 0x10);
         return;
@@ -114,7 +113,7 @@ void FILTER2()
     s16 outbuff[0x3c0], *outp;
     u32 inPtr = (u32)(k0 & 0xffff);
 
-    inp1 = (i16*)(save);
+    inp1 = (i16*)save;
     outp = outbuff;
     inp2 = (i16*)(BufferSpace + inPtr);
 
@@ -169,9 +168,9 @@ void POLEF()
 #if defined(SSE2_SUPPORT)
     __m128i xmm_source, xmm_target, prod_hi, prod_lo, prod_m, prod_n, xmm_gain;
 #endif
-    u8 Flags = (u8)((k0 >> 16) & 0xff);
+    u8 Flags = (u8)(k0 >> 16 & 0xff);
     s16 Gain = (u16)(k0 & 0xffff);
-    u32 Address = (t9 & 0xffffff); // + SEGMENTS[(t9>>24)&0xf];
+    u32 Address = t9 & 0xffffff; // + SEGMENTS[(t9>>24)&0xf];
 
     s16* dst = (s16*)(BufferSpace + AudioOutBuffer);
 
@@ -183,7 +182,7 @@ void POLEF()
     s16 h2_before[8];
     if (AudioCount == 0)
         return;
-    int count = (AudioCount + 15) & ~15;
+    int count = AudioCount + 15 & ~15;
 
     if (Flags & A_INIT)
     {
@@ -213,7 +212,7 @@ void POLEF()
 #else
     copy_vector(&h2_before[0], &h2[0]);
     for (i = 0; i < 8; i++)
-        h2[i] = (((s32)h2[i] * Gain) >> 14);
+        h2[i] = ((s32)h2[i] * Gain) >> 14;
 #endif
 
     s16* inp = (s16*)(BufferSpace + AudioInBuffer);

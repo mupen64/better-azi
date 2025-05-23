@@ -316,10 +316,10 @@ void musyx_v2_task(struct hle_t* hle)
 
 static void load_base_vol(struct hle_t* hle, int32_t* base_vol, uint32_t address)
 {
-    base_vol[0] = ((uint32_t)(*dram_u16(hle, address)) << 16) | (*dram_u16(hle, address + 8));
-    base_vol[1] = ((uint32_t)(*dram_u16(hle, address + 2)) << 16) | (*dram_u16(hle, address + 10));
-    base_vol[2] = ((uint32_t)(*dram_u16(hle, address + 4)) << 16) | (*dram_u16(hle, address + 12));
-    base_vol[3] = ((uint32_t)(*dram_u16(hle, address + 6)) << 16) | (*dram_u16(hle, address + 14));
+    base_vol[0] = (uint32_t)*dram_u16(hle, address) << 16 | *dram_u16(hle, address + 8);
+    base_vol[1] = (uint32_t)*dram_u16(hle, address + 2) << 16 | *dram_u16(hle, address + 10);
+    base_vol[2] = (uint32_t)*dram_u16(hle, address + 4) << 16 | *dram_u16(hle, address + 12);
+    base_vol[3] = (uint32_t)*dram_u16(hle, address + 6) << 16 | *dram_u16(hle, address + 14);
 }
 
 static void save_base_vol(struct hle_t* hle, const int32_t* base_vol, uint32_t address)
@@ -334,7 +334,7 @@ static void save_base_vol(struct hle_t* hle, const int32_t* base_vol, uint32_t a
 
     for (k = 0; k < 4; ++k)
     {
-        *dram_u16(hle, address) = (uint16_t)(base_vol[k]);
+        *dram_u16(hle, address) = (uint16_t)base_vol[k];
         address += 2;
     }
 }
@@ -407,10 +407,10 @@ static void init_subframes_v1(musyx_t* musyx)
 
     for (i = 0; i < SUBFRAME_SIZE; ++i)
     {
-        *(e50++) = base_e50;
-        *(left++) = clamp_s16(*cc0 + base_cc0);
-        *(right++) = clamp_s16(-*cc0 - base_cc0);
-        *(cc0++) = 0;
+        *e50++ = base_e50;
+        *left++ = clamp_s16(*cc0 + base_cc0);
+        *right++ = clamp_s16(-*cc0 - base_cc0);
+        *cc0++ = 0;
     }
 }
 
@@ -432,7 +432,7 @@ static void init_subframes_v2(musyx_t* musyx)
     {
 
         for (k = 0; k < 4; ++k)
-            *(subframes[k]++) = values[k];
+            *subframes[k]++ = values[k];
     }
 }
 
@@ -615,7 +615,7 @@ static void adpcm_decode_frames(struct hle_t* hle,
         uint8_t c2 = nibbles[0];
 
         const int16_t* book = (c2 & 0xf0) + table;
-        unsigned int rshift = (c2 & 0x0f);
+        unsigned int rshift = c2 & 0x0f;
 
         adpcm_predict_frame(frame, src, nibbles, rshift);
 
@@ -642,15 +642,15 @@ static void adpcm_predict_frame(int16_t* dst, const uint8_t* src, const uint8_t*
 {
     unsigned int i;
 
-    *(dst++) = (src[0] << 8) | src[1];
-    *(dst++) = (src[2] << 8) | src[3];
+    *dst++ = src[0] << 8 | src[1];
+    *dst++ = src[2] << 8 | src[3];
 
     for (i = 1; i < 16; ++i)
     {
         uint8_t byte = nibbles[i];
 
-        *(dst++) = adpcm_predict_sample(byte, 0xf0, 8, rshift);
-        *(dst++) = adpcm_predict_sample(byte, 0x0f, 12, rshift);
+        *dst++ = adpcm_predict_sample(byte, 0xf0, 8, rshift);
+        *dst++ = adpcm_predict_sample(byte, 0x0f, 12, rshift);
     }
 }
 
@@ -671,7 +671,7 @@ static void mix_voice_samples(struct hle_t* hle, musyx_t* musyx, uint32_t voice_
     const int16_t* sample = samples + segbase + offset + u16_4e;
     const int16_t* const sample_end = samples + segbase + end_point;
     const int16_t* const sample_restart = samples + (restart_point & 0x7fff) +
-    (((restart_point & 0x8000) != 0) ? 0x000 : segbase);
+    ((restart_point & 0x8000) != 0 ? 0x000 : segbase);
 
 
     uint32_t pitch_accu = pitch_q16;
@@ -715,11 +715,11 @@ static void mix_voice_samples(struct hle_t* hle, musyx_t* musyx, uint32_t voice_
     for (i = 0; i < SUBFRAME_SIZE; ++i)
     {
         /* update sample and lut pointers and then pitch_accu */
-        const int16_t* lut = (RESAMPLE_LUT + ((pitch_accu & 0xfc00) >> 8));
+        const int16_t* lut = RESAMPLE_LUT + ((pitch_accu & 0xfc00) >> 8);
         int dist;
         int16_t v;
 
-        sample += (pitch_accu >> 16);
+        sample += pitch_accu >> 16;
         pitch_accu &= 0xffff;
         pitch_accu += pitch_step;
 
@@ -736,10 +736,10 @@ static void mix_voice_samples(struct hle_t* hle, musyx_t* musyx, uint32_t voice_
             /* envmix */
             int32_t accu = (v * (v4_env[k] >> 16)) >> 15;
             v4[k] = clamp_s16(accu);
-            *(v4_dst[k]) = clamp_s16(accu + *(v4_dst[k]));
+            *v4_dst[k] = clamp_s16(accu + *v4_dst[k]);
 
             /* update envelopes and dst pointers */
-            ++(v4_dst[k]);
+            ++v4_dst[k];
             v4_env[k] += v4_env_step[k];
         }
     }
@@ -870,7 +870,7 @@ static void sfx_stage(struct hle_t* hle, mix_sfx_with_main_subframes_t mix_sfx_w
 #pragma warning(disable : 4100)
 #endif
 
-static void mix_sfx_with_main_subframes_v1(musyx_t* musyx, const int16_t* subframe, const uint16_t* UNUSED(gains))
+static void mix_sfx_with_main_subframes_v1(musyx_t* musyx, const int16_t* subframe, const uint16_t* gains)
 {
     unsigned i;
 
@@ -954,10 +954,10 @@ static void interleave_stage_v1(struct hle_t* hle, musyx_t* musyx, uint32_t outp
 
     for (i = 0; i < SUBFRAME_SIZE; ++i)
     {
-        uint16_t l = clamp_s16(*(left++) + base_left);
-        uint16_t r = clamp_s16(*(right++) + base_right);
+        uint16_t l = clamp_s16(*left++ + base_left);
+        uint16_t r = clamp_s16(*right++ + base_right);
 
-        *(dst++) = (l << 16) | r;
+        *dst++ = l << 16 | r;
     }
 }
 
@@ -1010,7 +1010,7 @@ static void interleave_stage_v2(struct hle_t* hle, musyx_t* musyx, uint16_t mask
     {
         uint16_t l = musyx->left[i];
         uint16_t r = musyx->right[i];
-        *(dst++) = (l << 16) | r;
+        *dst++ = l << 16 | r;
     }
 
     /* writeback subframe @ptr_1c */

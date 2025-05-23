@@ -9,18 +9,4 @@
 
 #include "../my_types.h"
 
-/* macro for unused variable warning suppression */
-#ifdef __GNUC__
-#define UNUSED(x) UNUSED_##x __attribute__((__unused__))
-#else
-#define UNUSED(x) UNUSED_##x
-#endif
-
-/* macro for inline keyword */
-#ifdef _MSC_VER
-#define inline __inline
-#elif defined(__GNUC_GNU_INLINE__)
-#define inline
-#endif
-
 #endif

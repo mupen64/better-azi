@@ -280,7 +280,7 @@ int32_t rdot(size_t n, const int16_t* x, const int16_t* y)
 
     while (n != 0)
     {
-        accu += *(x++) * *(--y);
+        accu += *x++ * *--y;
         --n;
     }
 
@@ -305,4 +305,11 @@ void adpcm_compute_residuals(int16_t* dst, const int16_t* src, const int16_t* cb
         accu += book1[i] * l1 + book2[i] * l2 + rdot(i, book2, src);
         dst[i] = clamp_s16(accu >> 11);
     }
+}
+
+int16_t adpcm_predict_sample(uint8_t byte, uint8_t mask, unsigned lshift, unsigned rshift)
+{
+    int16_t sample = (uint16_t)(byte & mask) << lshift;
+    sample >>= rshift; /* signed */
+    return sample;
 }

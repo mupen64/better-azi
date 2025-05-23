@@ -58,7 +58,7 @@
         <Link>
             <AdditionalLibraryDirectories Condition="'$(Platform)'=='Win32'">$(SolutionDir)3rd Party\directx\lib\x86</AdditionalLibraryDirectories>
             <AdditionalLibraryDirectories Condition="'$(Platform)'=='x64'">$(SolutionDir)3rd Party\directx\lib\x64</AdditionalLibraryDirectories>
-            <AdditionalDependencies>dsound.lib;%(AdditionalDependencies)</AdditionalDependencies>
+            <AdditionalDependencies>dsound.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
             <LinkTimeCodeGeneration Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
             <OutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\PJ64_1.6.2\Plugin\$(TargetName)$(TargetExt)</OutputFile>
             <OutputFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\PJ64_1.6.2\Plugin\$(TargetName)$(TargetExt)</OutputFile>
@@ -110,7 +110,6 @@
         <ClCompile Include="SoundDriver.cpp"/>
         <ClCompile Include="SoundDriverFactory.cpp"/>
         <ClCompile Include="SoundDriverInterface.cpp"/>
-        <ClCompile Include="SoundDriverLegacy.cpp"/>
         <ClCompile Include="WaveOut.cpp"/>
         <ClCompile Include="XAudio2SoundDriver.cpp"/>
     </ItemGroup>

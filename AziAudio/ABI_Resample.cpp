@@ -11,11 +11,11 @@ u16 ResampleLUT[0x200] = {
 
 s32 MultAddLUT(s16* src, u32 srcPtr, u32 location)
 {
-    s16* lut = (s16*)(((u8*)ResampleLUT) + location);
+    s16* lut = (s16*)((u8*)ResampleLUT + location);
     s32 accum = 0;
     for (int i = 0; i < 4; i++)
     {
-        s32 temp = ((s32) * (s16*)(src + MES(srcPtr + i)) * ((s32)((s16)lut[i])));
+        s32 temp = (s32) * (s16*)(src + MES(srcPtr + i)) * (s32)(s16)lut[i];
         accum += (s32)((temp + 0x4000) >> 15);
     }
 
@@ -24,17 +24,17 @@ s32 MultAddLUT(s16* src, u32 srcPtr, u32 location)
 
 void RESAMPLE()
 {
-    u8 Flags = (u8)((k0 >> 16) & 0xff);
-    u32 Pitch = ((k0 & 0xffff)) << 1;
-    u32 addy = (t9 & 0xffffff); // + SEGMENTS[(t9>>24)&0xf];
+    u8 Flags = (u8)(k0 >> 16 & 0xff);
+    u32 Pitch = (k0 & 0xffff) << 1;
+    u32 addy = t9 & 0xffffff; // + SEGMENTS[(t9>>24)&0xf];
     u32 Accum = 0;
     u32 location;
     s16* dst;
     s16* src;
-    dst = (s16*)(BufferSpace);
-    src = (s16*)(BufferSpace);
-    u32 srcPtr = (AudioInBuffer / 2);
-    u32 dstPtr = (AudioOutBuffer / 2);
+    dst = (s16*)BufferSpace;
+    src = (s16*)BufferSpace;
+    u32 srcPtr = AudioInBuffer / 2;
+    u32 dstPtr = AudioOutBuffer / 2;
 
     /*
     if (addy > (1024*1024*8))
@@ -46,7 +46,7 @@ void RESAMPLE()
     {
         // memcpy (src+srcPtr, rdram+addy, 0x8);
         for (int x = 0; x < 4; x++)
-            src[MES(srcPtr + x)] = ((u16*)DRAM)[MES((addy / 2) + x)];
+            src[MES(srcPtr + x)] = ((u16*)DRAM)[MES(addy / 2 + x)];
         Accum = *(u16*)(DRAM + addy + 10);
     }
     else
@@ -57,7 +57,7 @@ void RESAMPLE()
 
     assert((Flags & 0x2) == 0);
 
-    for (int i = 0; i < ((AudioCount + 0xf) & 0xFFF0) / 2; i++)
+    for (int i = 0; i < (AudioCount + 0xf & 0xFFF0) / 2; i++)
     {
         // location = (((Accum * 0x40) >> 0x10) * 8);
         location = (Accum >> 0xa) << 0x3;
@@ -78,38 +78,38 @@ void RESAMPLE()
         dst[MES(dstPtr)] = pack_signed(MultAddLUT(src, srcPtr, location));
         dstPtr++;
         Accum += Pitch;
-        srcPtr += (Accum >> 16);
+        srcPtr += Accum >> 16;
         Accum &= 0xffff;
     }
     for (int x = 0; x < 4; x++)
-        ((u16*)DRAM)[MES((addy / 2) + x)] = src[MES(srcPtr + x)];
+        ((u16*)DRAM)[MES(addy / 2 + x)] = src[MES(srcPtr + x)];
     // memcpy (RSWORK, src+srcPtr, 0x8);
     *(u16*)(DRAM + addy + 10) = (u16)Accum;
 }
 
 void RESAMPLE2()
 {
-    u8 Flags = (u8)((k0 >> 16) & 0xff);
-    u32 Pitch = ((k0 & 0xffff)) << 1;
-    u32 addy = (t9 & 0xffffff); // + SEGMENTS[(t9>>24)&0xf];
+    u8 Flags = (u8)(k0 >> 16 & 0xff);
+    u32 Pitch = (k0 & 0xffff) << 1;
+    u32 addy = t9 & 0xffffff; // + SEGMENTS[(t9>>24)&0xf];
     u32 Accum = 0;
     u32 location;
     s16* dst;
     s16* src;
-    dst = (s16*)(BufferSpace);
-    src = (s16*)(BufferSpace);
-    u32 srcPtr = (AudioInBuffer / 2);
-    u32 dstPtr = (AudioOutBuffer / 2);
+    dst = (s16*)BufferSpace;
+    src = (s16*)BufferSpace;
+    u32 srcPtr = AudioInBuffer / 2;
+    u32 dstPtr = AudioOutBuffer / 2;
 
-    if (addy > (1024 * 1024 * 8))
-        addy = (t9 & 0xffffff);
+    if (addy > 1024 * 1024 * 8)
+        addy = t9 & 0xffffff;
 
     srcPtr -= 4;
 
     if ((Flags & 0x1) == 0)
     {
         for (int x = 0; x < 4; x++) // memcpy (src+srcPtr, rdram+addy, 0x8);
-            src[MES(srcPtr + x)] = ((u16*)DRAM)[MES((addy / 2) + x)];
+            src[MES(srcPtr + x)] = ((u16*)DRAM)[MES(addy / 2 + x)];
         Accum = *(u16*)(DRAM + addy + 10);
     }
     else
@@ -120,35 +120,35 @@ void RESAMPLE2()
 
     //	assert((Flags & 0x2) == 0);
 
-    for (int i = 0; i < ((AudioCount + 0xf) & 0xFFF0) / 2; i++)
+    for (int i = 0; i < (AudioCount + 0xf & 0xFFF0) / 2; i++)
     {
-        location = (((Accum * 0x40) >> 0x10) * 8);
+        location = ((Accum * 0x40) >> 0x10) * 8;
         // location = (Accum >> 0xa) << 0x3;
 
         dst[MES(dstPtr)] = pack_signed(MultAddLUT(src, srcPtr, location));
         dstPtr++;
         Accum += Pitch;
-        srcPtr += (Accum >> 16);
+        srcPtr += Accum >> 16;
         Accum &= 0xffff;
     }
     for (int x = 0; x < 4; x++)
-        ((u16*)DRAM)[MES((addy / 2) + x)] = src[MES(srcPtr + x)];
+        ((u16*)DRAM)[MES(addy / 2 + x)] = src[MES(srcPtr + x)];
     *(u16*)(DRAM + addy + 10) = (u16)Accum;
     // memcpy (RSWORK, src+srcPtr, 0x8);
 }
 
 void RESAMPLE3()
 {
-    u8 Flags = (u8)((t9 >> 0x1e));
-    u32 Pitch = ((t9 >> 0xe) & 0xffff) << 1;
-    u32 addy = (k0 & 0xffffff);
+    u8 Flags = (u8)(t9 >> 0x1e);
+    u32 Pitch = (t9 >> 0xe & 0xffff) << 1;
+    u32 addy = k0 & 0xffffff;
     u32 Accum = 0;
     u32 location;
     s16* dst;
     s16* src;
-    dst = (s16*)(BufferSpace);
-    src = (s16*)(BufferSpace);
-    u32 srcPtr = ((((t9 >> 2) & 0xfff) + 0x4f0) / 2);
+    dst = (s16*)BufferSpace;
+    src = (s16*)BufferSpace;
+    u32 srcPtr = ((t9 >> 2 & 0xfff) + 0x4f0) / 2;
     u32 dstPtr; //=(AudioOutBuffer/2);
 
     // if (addy > (1024*1024*8))
@@ -168,7 +168,7 @@ void RESAMPLE3()
     if ((Flags & 0x1) == 0)
     {
         for (int x = 0; x < 4; x++) // memcpy (src+srcPtr, rdram+addy, 0x8);
-            src[MES(srcPtr + x)] = ((u16*)DRAM)[MES((addy / 2) + x)];
+            src[MES(srcPtr + x)] = ((u16*)DRAM)[MES(addy / 2 + x)];
         Accum = *(u16*)(DRAM + addy + 10);
     }
     else
@@ -183,7 +183,7 @@ void RESAMPLE3()
 
     for (int i = 0; i < 0x170 / 2; i++)
     {
-        location = (((Accum * 0x40) >> 0x10) * 8);
+        location = ((Accum * 0x40) >> 0x10) * 8;
         // location = (Accum >> 0xa) << 0x3;
 
         /*
@@ -200,10 +200,10 @@ void RESAMPLE3()
         dst[MES(dstPtr)] = pack_signed(MultAddLUT(src, srcPtr, location));
         dstPtr++;
         Accum += Pitch;
-        srcPtr += (Accum >> 16);
+        srcPtr += Accum >> 16;
         Accum &= 0xffff;
     }
     for (int x = 0; x < 4; x++)
-        ((u16*)DRAM)[MES((addy / 2) + x)] = src[MES(srcPtr + x)];
+        ((u16*)DRAM)[MES(addy / 2 + x)] = src[MES(srcPtr + x)];
     *(u16*)(DRAM + addy + 10) = (u16)Accum;
 }

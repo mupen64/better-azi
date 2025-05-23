@@ -53,18 +53,10 @@ extern OSVERSIONINFOEX OSInfo;
 #include "my_types.h"
 
 enum SoundDriverType {
-    SND_DRIVER_NOSOUND = 0x0000,
-    // Windows-only
-    SND_DRIVER_DS8L = 0x1000,
-    SND_DRIVER_DS8 = 0x1001,
-    SND_DRIVER_XA2L = 0x1002,
-    SND_DRIVER_XA2 = 0x1003,
-    SND_DRIVER_WASAPI = 0x1004,
-    SND_DRIVER_WAVEOUT = 0x1005,
-    // Cross Platform
-    SND_DRIVER_PORTAUDIO = 0x1100 // NYI
+    SND_DRIVER_NOSOUND,
+    SND_DRIVER_DS8,
+    SND_DRIVER_XA2,
 };
-
 
 typedef struct {
     u16 Version;

@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
 
-#ifndef HLE_H
-#define HLE_H
+#pragma once
 
 #include "hle_internal.h"
 
@@ -34,5 +33,3 @@ void hle_init(struct hle_t* hle,
               void* user_defined);
 
 void hle_execute(struct hle_t* hle);
-
-#endif

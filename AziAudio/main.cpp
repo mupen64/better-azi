@@ -6,26 +6,11 @@
 
 #include "common.h"
 #include "AudioSpec.h"
-
 #include "SoundDriverInterface.h"
 #include "SoundDriverFactory.h"
-
 #include "audiohle.h"
-// #include "rsp/rsp.h"
-
 #include <string.h> // memcpy(), strcpy()
 #include <stdio.h> // needed for configuration
-
-#ifdef USE_PRINTF
-#ifdef _WIN32
-#include <io.h>
-#include <fcntl.h>
-#undef __in
-#undef __out
-#include <ios>
-void RedirectIOToConsole();
-#endif
-#endif
 
 SoundDriverInterface* snd = NULL;
 
@@ -111,8 +96,8 @@ EXPORT Boolean CALL InitiateAudio(AUDIO_INFO Audio_Info)
     ZeroMemory(&OSInfo, sizeof(OSVERSIONINFOEX));
     OSInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
     GetVersionEx((LPOSVERSIONINFO)&OSInfo);
-    DEBUG_OUTPUT("%04X %04X\n", _WIN32_WINNT, WINVER);
-    DEBUG_OUTPUT("Windows %li.%li  Build %li, Platform: %li\n", OSInfo.dwMajorVersion, OSInfo.dwMinorVersion, OSInfo.dwBuildNumber, OSInfo.dwPlatformId);
+    DEBUG_OUTPUT "%04X %04X\n", _WIN32_WINNT, WINVER;
+    DEBUG_OUTPUT "Windows %li.%li  Build %li, Platform: %li\n", OSInfo.dwMajorVersion, OSInfo.dwMinorVersion, OSInfo.dwBuildNumber, OSInfo.dwPlatformId;
 #endif
     // Dacrate = 0;
     // CloseDLL ();
@@ -142,7 +127,7 @@ EXPORT Boolean CALL InitiateAudio(AUDIO_INFO Audio_Info)
 
 EXPORT void CALL CloseDLL(void)
 {
-    DEBUG_OUTPUT("Call: CloseDLL()\n");
+    DEBUG_OUTPUT "Call: CloseDLL()\n";
     if (snd != NULL)
     {
         snd->AI_Shutdown();
@@ -181,7 +166,7 @@ EXPORT void CALL RomOpen(void)
         first_time = false;
         Configuration::LoadSettings();
     }
-    DEBUG_OUTPUT("Call: RomOpen()\n");
+    DEBUG_OUTPUT "Call: RomOpen()\n";
     if (snd == NULL)
         return;
     // snd->AI_ResetAudio();
@@ -191,7 +176,7 @@ EXPORT void CALL RomClosed(void)
 {
     Configuration::RomRunning = false;
     Configuration::LoadSettings();
-    DEBUG_OUTPUT("Call: RomClosed()\n");
+    DEBUG_OUTPUT "Call: RomClosed()\n";
     Dacrate = 0; // Forces a revisit to initialize audio
     if (snd == NULL)
         return;
@@ -214,7 +199,7 @@ EXPORT void CALL AiDacrateChanged(int SystemType)
     u32 Frequency, video_clock;
 
     ai_delayed_carry = false;
-    DEBUG_OUTPUT("Call: AiDacrateChanged()\n");
+    DEBUG_OUTPUT "Call: AiDacrateChanged()\n";
     if (snd == NULL)
         return;
     if (Dacrate == *AudioInfo.AI_DACRATE_REG)
@@ -245,31 +230,31 @@ EXPORT void CALL AiDacrateChanged(int SystemType)
     }
     Frequency = video_clock / (Dacrate + 1);
 #if 1
-    if ((Frequency > 7000) && (Frequency < 9000))
+    if (Frequency > 7000 && Frequency < 9000)
         Frequency = 8000;
-    else if ((Frequency > 10000) && (Frequency < 12000))
+    else if (Frequency > 10000 && Frequency < 12000)
         Frequency = 11025;
-    else if ((Frequency > 18000) && (Frequency < 20000))
+    else if (Frequency > 18000 && Frequency < 20000)
         Frequency = 19000;
-    else if ((Frequency > 21000) && (Frequency < 23000))
+    else if (Frequency > 21000 && Frequency < 23000)
         Frequency = 22050;
-    else if ((Frequency > 31000) && (Frequency < 33000))
+    else if (Frequency > 31000 && Frequency < 33000)
         Frequency = 32000;
-    else if ((Frequency > 43000) && (Frequency < 45000))
+    else if (Frequency > 43000 && Frequency < 45000)
         Frequency = 44100;
-    else if ((Frequency > 47000) && (Frequency < 49000))
+    else if (Frequency > 47000 && Frequency < 49000)
         Frequency = 48000;
     else
-        DEBUG_OUTPUT("Unable to standardize Frequeny!\n");
+        DEBUG_OUTPUT "Unable to standardize Frequeny!\n";
 #endif
-    DEBUG_OUTPUT("Frequency = %i\n", Frequency);
+    DEBUG_OUTPUT "Frequency = %i\n", Frequency;
     snd->AI_SetFrequency(Frequency);
 }
 
 EXPORT void CALL AiLenChanged(void)
 {
-    u32 address = (*AudioInfo.AI_DRAM_ADDR_REG & 0x00FFFFF8);
-    u32 length = (*AudioInfo.AI_LEN_REG & 0x3FFF8);
+    u32 address = *AudioInfo.AI_DRAM_ADDR_REG & 0x00FFFFF8;
+    u32 length = *AudioInfo.AI_LEN_REG & 0x3FFF8;
 
     if (snd == NULL)
         return;
@@ -277,7 +262,7 @@ EXPORT void CALL AiLenChanged(void)
     if (ai_delayed_carry)
         address += 0x2000;
 
-    if (((address + length) & 0x1FFF) == 0)
+    if ((address + length & 0x1FFF) == 0)
         ai_delayed_carry = true;
     else
         ai_delayed_carry = false;

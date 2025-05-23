@@ -8,8 +8,8 @@
 
 void ADDMIXER()
 {
-    s16 Count = (k0 >> 12) & 0x0FF0;
-    u16 InBuffer = (t9 >> 16);
+    s16 Count = k0 >> 12 & 0x0FF0;
+    u16 InBuffer = t9 >> 16;
     u16 OutBuffer = t9 & 0xffff;
 
     s16 *inp, *outp;
@@ -28,9 +28,9 @@ void ADDMIXER()
 void HILOGAIN()
 {
     u16 cnt = k0 & 0xffff;
-    u16 out = (t9 >> 16) & 0xffff;
-    s16 hi = (s16)((k0 >> 4) & 0xf000);
-    u16 lo = (k0 >> 20) & 0xf;
+    u16 out = t9 >> 16 & 0xffff;
+    s16 hi = (s16)(k0 >> 4 & 0xf000);
+    u16 lo = k0 >> 20 & 0xf;
     s16* src;
 
     src = (s16*)(BufferSpace + out);
@@ -56,20 +56,20 @@ void INTERLEAVE()
     u16 Left, Right;
 
     inL = t9 & 0xFFFF;
-    inR = (t9 >> 16) & 0xFFFF;
+    inR = t9 >> 16 & 0xFFFF;
 
     inSrcR = (u16*)(BufferSpace + inR);
     inSrcL = (u16*)(BufferSpace + inL);
 
-    for (int x = 0; x < (AudioCount / 4); x++)
+    for (int x = 0; x < AudioCount / 4; x++)
     {
-        Left = *(inSrcL++);
-        Right = *(inSrcR++);
+        Left = *inSrcL++;
+        Right = *inSrcR++;
 
-        *(outbuff++) = *(inSrcR++);
-        *(outbuff++) = *(inSrcL++);
-        *(outbuff++) = (u16)Right;
-        *(outbuff++) = (u16)Left;
+        *outbuff++ = *inSrcR++;
+        *outbuff++ = *inSrcL++;
+        *outbuff++ = (u16)Right;
+        *outbuff++ = (u16)Left;
     }
 }
 
@@ -77,7 +77,7 @@ void INTERL2()
 {
     s16 Count = k0 & 0xFFFF;
     u16 Out = t9 & 0xffff;
-    u16 In = (t9 >> 16);
+    u16 In = t9 >> 16;
     u8* src;
     u8* dst;
 
@@ -100,7 +100,7 @@ void INTERLEAVE2()
     u16* inSrcL;
     u16 Left, Right;
     u32 count;
-    count = ((k0 >> 12) & 0xFF0);
+    count = k0 >> 12 & 0xFF0;
     if (count == 0)
     {
         outbuff = (u16*)(AudioOutBuffer + BufferSpace);
@@ -112,20 +112,20 @@ void INTERLEAVE2()
     }
 
     inR = t9 & 0xFFFF;
-    inL = (t9 >> 16) & 0xFFFF;
+    inL = t9 >> 16 & 0xFFFF;
 
     inSrcR = (u16*)(BufferSpace + inR);
     inSrcL = (u16*)(BufferSpace + inL);
 
-    for (u32 x = 0; x < (count / 4); x++)
+    for (u32 x = 0; x < count / 4; x++)
     {
-        Left = *(inSrcL++);
-        Right = *(inSrcR++);
+        Left = *inSrcL++;
+        Right = *inSrcR++;
 
-        *(outbuff++) = *(inSrcR++);
-        *(outbuff++) = *(inSrcL++);
-        *(outbuff++) = (u16)Right;
-        *(outbuff++) = (u16)Left;
+        *outbuff++ = *inSrcR++;
+        *outbuff++ = *inSrcL++;
+        *outbuff++ = (u16)Right;
+        *outbuff++ = (u16)Left;
     }
 }
 
@@ -143,15 +143,15 @@ void INTERLEAVE3()
     inSrcR = (u16*)(BufferSpace + 0xb40);
     inSrcL = (u16*)(BufferSpace + 0x9d0);
 
-    for (int x = 0; x < (0x170 / 4); x++)
+    for (int x = 0; x < 0x170 / 4; x++)
     {
-        Left = *(inSrcL++);
-        Right = *(inSrcR++);
+        Left = *inSrcL++;
+        Right = *inSrcR++;
 
-        *(outbuff++) = *(inSrcR++);
-        *(outbuff++) = *(inSrcL++);
-        *(outbuff++) = (u16)Right;
-        *(outbuff++) = (u16)Left;
+        *outbuff++ = *inSrcR++;
+        *outbuff++ = *inSrcL++;
+        *outbuff++ = (u16)Right;
+        *outbuff++ = (u16)Left;
         /*
         Left=*(inSrcL++);
         Right=*(inSrcR++);
@@ -188,7 +188,7 @@ void MIXER2()
 { // Needs accuracy verification...
     u16 dmemin = (u16)(t9 >> 0x10);
     u16 dmemout = (u16)(t9 & 0xFFFF);
-    u32 count = ((k0 >> 12) & 0xFF0);
+    u32 count = k0 >> 12 & 0xFF0;
     s32 gain = (s16)(k0 & 0xFFFF) * 2;
     s32 temp;
 
