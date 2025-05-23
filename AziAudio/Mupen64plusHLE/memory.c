@@ -1,32 +1,8 @@
-/****************************************************************************
-*                                                                           *
-* Azimer's HLE Audio Plugin for Project64 Legacy Compatible N64 Emulators   *
-* https://www.project64-legacy.com/                                         *
-* Copyright (C) 2000-2023 Azimer. All rights reserved.                      *
-*                                                                           *
-* License:                                                                  *
-*                                                                           *
-* GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html                        *
-*                                                                           *
-*   Mupen64plus-rsp-hle - memory.c                                          *
-*   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/             *
-*   Copyright (C) 2013 Bobby Smiles                                         *
-*                                                                           *
-*   This program is free software; you can redistribute it and/or modify    *
-*   it under the terms of the GNU General Public License as published by    *
-*   the Free Software Foundation; either version 2 of the License, or       *
-*   (at your option) any later version.                                     *
-*                                                                           *
-*   This program is distributed in the hope that it will be useful,         *
-*   but WITHOUT ANY WARRANTY; without even the implied warranty of          *
-*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
-*   GNU General Public License for more details.                            *
-*                                                                           *
-*   You should have received a copy of the GNU General Public License       *
-*   along with this program; if not, write to the                           *
-*   Free Software Foundation, Inc.,                                         *
-*   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.            *
-*****************************************************************************/
+/*
+ * Copyright (c) 2025, Mupen64 maintainers, contributors, and original authors (Azimer, Bobby Smiles).
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ */
 
 #include <string.h>
 #include <assert.h>
@@ -44,26 +20,27 @@
 
 static uint8_t* pt_u8(const unsigned char* buffer, unsigned address)
 {
-    return (uint8_t *)(buffer + (address ^ ENDIAN_SWAP_BYTE));
+    return (uint8_t*)(buffer + (address ^ ENDIAN_SWAP_BYTE));
 }
 
 static uint16_t* pt_u16(const unsigned char* buffer, unsigned address)
 {
     assert((address & 1) == 0);
-    return (uint16_t *)(buffer + (address ^ ENDIAN_SWAP_HALF));
+    return (uint16_t*)(buffer + (address ^ ENDIAN_SWAP_HALF));
 }
 
 static uint32_t* pt_u32(const unsigned char* buffer, unsigned address)
 {
     assert((address & 3) == 0);
-    return (uint32_t *)(buffer + address);
+    return (uint32_t*)(buffer + address);
 }
 
 
 /* Global functions */
 void load_u8(uint8_t* dst, const unsigned char* buffer, unsigned address, size_t count)
 {
-    while (count != 0) {
+    while (count != 0)
+    {
         *(dst++) = *pt_u8(buffer, address);
         address += 1;
         --count;
@@ -72,7 +49,8 @@ void load_u8(uint8_t* dst, const unsigned char* buffer, unsigned address, size_t
 
 void load_u16(uint16_t* dst, const unsigned char* buffer, unsigned address, size_t count)
 {
-    while (count != 0) {
+    while (count != 0)
+    {
         *(dst++) = *pt_u16(buffer, address);
         address += 2;
         --count;
@@ -87,7 +65,8 @@ void load_u32(uint32_t* dst, const unsigned char* buffer, unsigned address, size
 
 void store_u8(unsigned char* buffer, unsigned address, const uint8_t* src, size_t count)
 {
-    while (count != 0) {
+    while (count != 0)
+    {
         *pt_u8(buffer, address) = *(src++);
         address += 1;
         --count;
@@ -96,7 +75,8 @@ void store_u8(unsigned char* buffer, unsigned address, const uint8_t* src, size_
 
 void store_u16(unsigned char* buffer, unsigned address, const uint16_t* src, size_t count)
 {
-    while (count != 0) {
+    while (count != 0)
+    {
         *pt_u16(buffer, address) = *(src++);
         address += 2;
         --count;

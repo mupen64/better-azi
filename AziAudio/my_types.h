@@ -119,24 +119,16 @@
 #define HAVE_INT64_MINIMUM
 #endif
 
-#if defined(HAVE_INT8_EXACT)\
- || defined(HAVE_INT8_FAST) \
- || defined(HAVE_INT8_MINIMUM)
+#if defined(HAVE_INT8_EXACT) || defined(HAVE_INT8_FAST) || defined(HAVE_INT8_MINIMUM)
 #define HAVE_INT8
 #endif
-#if defined(HAVE_INT16_EXACT)\
- || defined(HAVE_INT16_FAST) \
- || defined(HAVE_INT16_MINIMUM)
+#if defined(HAVE_INT16_EXACT) || defined(HAVE_INT16_FAST) || defined(HAVE_INT16_MINIMUM)
 #define HAVE_INT16
 #endif
-#if defined(HAVE_INT32_EXACT)\
- || defined(HAVE_INT32_FAST) \
- || defined(HAVE_INT32_MINIMUM)
+#if defined(HAVE_INT32_EXACT) || defined(HAVE_INT32_FAST) || defined(HAVE_INT32_MINIMUM)
 #define HAVE_INT32
 #endif
-#if defined(HAVE_INT64_EXACT)\
- || defined(HAVE_INT64_FAST) \
- || defined(HAVE_INT64_MINIMUM)
+#if defined(HAVE_INT64_EXACT) || defined(HAVE_INT64_FAST) || defined(HAVE_INT64_MINIMUM)
 #define HAVE_INT64
 #endif
 
@@ -146,90 +138,87 @@
  * will instead rely on preprocessor logic and ABI detection or C89 rules to
  * define each of the types.
  */
-#if defined(HAVE_INT8) \
- && defined(HAVE_INT16)\
- && defined(HAVE_INT32)\
- && defined(HAVE_INT64)
+#if defined(HAVE_INT8) && defined(HAVE_INT16) && defined(HAVE_INT32) && defined(HAVE_INT64)
 #define HAVE_STANDARD_INTEGER_TYPES
 #endif
 
 #if defined(HAVE_INT8_EXACT)
-typedef int8_t                  s8;
-typedef uint8_t                 u8;
-typedef s8                      i8;
+typedef int8_t s8;
+typedef uint8_t u8;
+typedef s8 i8;
 #elif defined(HAVE_INT8_FAST)
-typedef int_fast8_t             s8;
-typedef uint_fast8_t            u8;
-typedef s8                      i8;
+typedef int_fast8_t s8;
+typedef uint_fast8_t u8;
+typedef s8 i8;
 #elif defined(HAVE_INT8_MINIMUM)
-typedef int_least8_t            s8;
-typedef uint_least8_t           u8;
-typedef s8                      i8;
+typedef int_least8_t s8;
+typedef uint_least8_t u8;
+typedef s8 i8;
 #elif defined(MICROSOFT_ABI)
-typedef signed __int8           s8;
-typedef unsigned __int8         u8;
-typedef __int8                  i8;
+typedef signed __int8 s8;
+typedef unsigned __int8 u8;
+typedef __int8 i8;
 #else
-typedef signed char             s8;
-typedef unsigned char           u8;
-typedef char                    i8;
+typedef signed char s8;
+typedef unsigned char u8;
+typedef char i8;
 #endif
 
 #if defined(HAVE_INT16_EXACT)
-typedef int16_t                 s16;
-typedef uint16_t                u16;
+typedef int16_t s16;
+typedef uint16_t u16;
 #elif defined(HAVE_INT16_FAST)
-typedef int_fast16_t            s16;
-typedef uint_fast16_t           u16;
+typedef int_fast16_t s16;
+typedef uint_fast16_t u16;
 #elif defined(HAVE_INT16_MINIMUM)
-typedef int_least16_t           s16;
-typedef uint_least16_t          u16;
+typedef int_least16_t s16;
+typedef uint_least16_t u16;
 #elif defined(MICROSOFT_ABI)
-typedef signed __int16          s16;
-typedef unsigned __int16        u16;
+typedef signed __int16 s16;
+typedef unsigned __int16 u16;
 #else
-typedef signed short            s16;
-typedef unsigned short          u16;
+typedef signed short s16;
+typedef unsigned short u16;
 #endif
 
 #if defined(HAVE_INT32_EXACT)
-typedef int32_t                 s32;
-typedef uint32_t                u32;
+typedef int32_t s32;
+typedef uint32_t u32;
 #elif defined(HAVE_INT32_FAST)
-typedef int_fast32_t            s32;
-typedef uint_fast32_t           u32;
+typedef int_fast32_t s32;
+typedef uint_fast32_t u32;
 #elif defined(HAVE_INT32_MINIMUM)
-typedef int_least32_t           s32;
-typedef uint_least32_t          u32;
+typedef int_least32_t s32;
+typedef uint_least32_t u32;
 #elif defined(MICROSOFT_ABI)
-typedef signed __int32          s32;
-typedef unsigned __int32        u32;
+typedef signed __int32 s32;
+typedef unsigned __int32 u32;
 #elif !defined(__LP64__) && (0xFFFFFFFFL < 0xFFFFFFFFUL)
-typedef signed long             s32;
-typedef unsigned long           u32;
+typedef signed long s32;
+typedef unsigned long u32;
 #else
-typedef signed int              s32;
-typedef unsigned int            u32;
+typedef signed int s32;
+typedef unsigned int u32;
 #endif
 
 #if defined(HAVE_INT64_EXACT)
-typedef int64_t                 s64;
-typedef uint64_t                u64;
+typedef int64_t s64;
+typedef uint64_t u64;
 #elif defined(HAVE_INT64_FAST)
-typedef int_fast64_t            s64;
-typedef uint_fast64_t           u64;
+typedef int_fast64_t s64;
+typedef uint_fast64_t u64;
 #elif defined(HAVE_INT64_MINIMUM)
-typedef int_least64_t           s64;
-typedef uint_least64_t          u64;
+typedef int_least64_t s64;
+typedef uint_least64_t u64;
 #elif defined(MICROSOFT_ABI)
-typedef signed __int64          s64;
-typedef unsigned __int64        u64;
+typedef signed __int64 s64;
+typedef unsigned __int64 u64;
 #elif defined(__LP64__) && (0x00000000FFFFFFFFUL < ~0UL)
-typedef signed long             s64;
-typedef unsigned long           u64;
+typedef signed long s64;
+typedef unsigned long u64;
 #else
-typedef signed long long        s64;
-typedef unsigned long long      u64;
+typedef signed long long s64;
+typedef unsigned long long u64;
 #endif
 
 /*
@@ -237,9 +226,9 @@ typedef unsigned long long      u64;
  * int' and `i32' instead of `s32' can be preferable to denote cases where
  * the signedness of something operated on is irrelevant to the algorithm.
  */
-typedef s16                     i16;
-typedef s32                     i32;
-typedef s64                     i64;
+typedef s16 i16;
+typedef s32 i32;
+typedef s64 i64;
 
 /*
  * If <stdint.h> was unavailable or not included (should be included before
@@ -256,14 +245,14 @@ typedef s64                     i64;
  * material to deduce any of our 8-, 16-, 32-, or 64-bit type definitions.
  */
 #ifndef HAVE_STANDARD_INTEGER_TYPES
-typedef s8      int8_t;
-typedef u8      uint8_t;
-typedef s16     int16_t;
-typedef u16     uint16_t;
-typedef s32     int32_t;
-typedef u32     uint32_t;
-typedef s64     int64_t;
-typedef u64     uint64_t;
+typedef s8 int8_t;
+typedef u8 uint8_t;
+typedef s16 int16_t;
+typedef u16 uint16_t;
+typedef s32 int32_t;
+typedef u32 uint32_t;
+typedef s64 int64_t;
+typedef u64 uint64_t;
 #define HAVE_STANDARD_INTEGER_TYPES
 #endif
 
@@ -274,8 +263,8 @@ typedef u64     uint64_t;
  * need 32- and 64-bit floating-point precision (which MIPS emulation does
  * require), then it could be nice to have these names just to be consistent.
  */
-typedef float                   f32;
-typedef double                  f64;
+typedef float f32;
+typedef double f64;
 
 /*
  * Pointer types, serving as the memory reference address to the actual type.
@@ -286,38 +275,38 @@ typedef double                  f64;
  *     ex) i32 *a, *b, *c;
  *     neutral:  `pi32 pointer;' or `pi32 a, b, c;'
  */
-typedef i8*                     pi8;
-typedef i16*                    pi16;
-typedef i32*                    pi32;
-typedef i64*                    pi64;
+typedef i8* pi8;
+typedef i16* pi16;
+typedef i32* pi32;
+typedef i64* pi64;
 
-typedef s8*                     ps8;
-typedef s16*                    ps16;
-typedef s32*                    ps32;
-typedef s64*                    ps64;
+typedef s8* ps8;
+typedef s16* ps16;
+typedef s32* ps32;
+typedef s64* ps64;
 
-typedef u8*                     pu8;
-typedef u16*                    pu16;
-typedef u32*                    pu32;
-typedef u64*                    pu64;
+typedef u8* pu8;
+typedef u16* pu16;
+typedef u32* pu32;
+typedef u64* pu64;
 
-typedef f32*                    pf32;
-typedef f64*                    pf64;
-typedef void*                   p_void;
-typedef void(*p_func)(void);
+typedef f32* pf32;
+typedef f64* pf64;
+typedef void* p_void;
+typedef void (*p_func)(void);
 
 /*
  * helper macros with exporting functions for shared objects or dynamically
  * loaded libraries
  */
 #if defined(_XBOX)
-#define EXPORT      
-#define CALL        
+#define EXPORT
+#define CALL
 #elif defined(_WIN32)
-#define EXPORT      __declspec(dllexport)
-#define CALL        __cdecl
+#define EXPORT __declspec(dllexport)
+#define CALL __cdecl
 #elif (__GNUC__)
-#define EXPORT      __attribute__((visibility("default")))
+#define EXPORT __attribute__((visibility("default")))
 #define CALL
 #endif
 
@@ -326,13 +315,13 @@ typedef void(*p_func)(void);
  * have that extra chance of supporting explicit [anti-]inline instructions.
  */
 #ifdef _MSC_VER
-#define INLINE      __inline
-#define NOINLINE    __declspec(noinline)
-#define ALIGNED     _declspec(align(16))
+#define INLINE __inline
+#define NOINLINE __declspec(noinline)
+#define ALIGNED _declspec(align(16))
 #elif defined(__GNUC__)
-#define INLINE      inline
-#define NOINLINE    __attribute__((noinline))
-#define ALIGNED     __attribute__((aligned(16)))
+#define INLINE inline
+#define NOINLINE __attribute__((noinline))
+#define ALIGNED __attribute__((aligned(16)))
 #else
 #define INLINE
 #define NOINLINE
@@ -386,39 +375,39 @@ typedef union {
  */
 #ifndef ENDIAN_M
 #if defined(__BIG_ENDIAN__) | (__BYTE_ORDER != __LITTLE_ENDIAN)
-#define ENDIAN_M    ( 0)
+#define ENDIAN_M (0)
 #else
-#define ENDIAN_M    (~0)
+#define ENDIAN_M (~0)
 #endif
 #endif
 
-#define ENDIAN_SWAP_BYTE    (ENDIAN_M & 0x7 & 3)
-#define ENDIAN_SWAP_HALF    (ENDIAN_M & 0x6 & 2)
-#define ENDIAN_SWAP_BIMI    (ENDIAN_M & 0x5 & 1)
-#define ENDIAN_SWAP_WORD    (ENDIAN_M & 0x4 & 0)
+#define ENDIAN_SWAP_BYTE (ENDIAN_M & 0x7 & 3)
+#define ENDIAN_SWAP_HALF (ENDIAN_M & 0x6 & 2)
+#define ENDIAN_SWAP_BIMI (ENDIAN_M & 0x5 & 1)
+#define ENDIAN_SWAP_WORD (ENDIAN_M & 0x4 & 0)
 
-#define BES(address)    ((address) ^ ENDIAN_SWAP_BYTE)
-#define HES(address)    ((address) ^ ENDIAN_SWAP_HALF)
-#define MES(address)    ((address) ^ ENDIAN_SWAP_BIMI)
-#define WES(address)    ((address) ^ ENDIAN_SWAP_WORD)
+#define BES(address) ((address) ^ ENDIAN_SWAP_BYTE)
+#define HES(address) ((address) ^ ENDIAN_SWAP_HALF)
+#define MES(address) ((address) ^ ENDIAN_SWAP_BIMI)
+#define WES(address) ((address) ^ ENDIAN_SWAP_WORD)
 
 /*
  * extra types of encoding for the well-known MIPS RISC architecture
  * Possibly implement other machine types in future versions of this header.
  */
 typedef struct {
-    unsigned opcode:  6;
-    unsigned rs:  5;
-    unsigned rt:  5;
-    unsigned rd:  5;
-    unsigned sa:  5;
-    unsigned function:  6;
+    unsigned opcode : 6;
+    unsigned rs : 5;
+    unsigned rt : 5;
+    unsigned rd : 5;
+    unsigned sa : 5;
+    unsigned function : 6;
 } MIPS_type_R;
 typedef struct {
-    unsigned opcode:  6;
-    unsigned rs:  5;
-    unsigned rt:  5;
-    unsigned imm:  16;
+    unsigned opcode : 6;
+    unsigned rs : 5;
+    unsigned rt : 5;
+    unsigned imm : 16;
 } MIPS_type_I;
 
 /*

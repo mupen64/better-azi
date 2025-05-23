@@ -1,32 +1,8 @@
-/****************************************************************************
-*                                                                           *
-* Azimer's HLE Audio Plugin for Project64 Legacy Compatible N64 Emulators   *
-* https://www.project64-legacy.com/                                         *
-* Copyright (C) 2000-2023 Azimer. All rights reserved.                      *
-*                                                                           *
-* License:                                                                  *
-*                                                                           *
-* GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html                        *
-*                                                                           *
-*   Mupen64plus-rsp-hle - memory.h                                          *
-*   Mupen64Plus homepage: http://code.google.com/p/mupen64plus/             *
-*   Copyright (C) 2014 Bobby Smiles                                         *
-*                                                                           *
-*   This program is free software; you can redistribute it and/or modify    *
-*   it under the terms of the GNU General Public License as published by    *
-*   the Free Software Foundation; either version 2 of the License, or       *
-*   (at your option) any later version.                                     *
-*                                                                           *
-*   This program is distributed in the hope that it will be useful,         *
-*   but WITHOUT ANY WARRANTY; without even the implied warranty of          *
-*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the           *
-*   GNU General Public License for more details.                            *
-*                                                                           *
-*   You should have received a copy of the GNU General Public License       *
-*   along with this program; if not, write to the                           *
-*   Free Software Foundation, Inc.,                                         *
-*   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.            *
-*****************************************************************************/
+/*
+ * Copyright (c) 2025, Mupen64 maintainers, contributors, and original authors (Azimer, Bobby Smiles).
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ */
 
 #ifndef MEMORY_H
 #define MEMORY_H
@@ -48,22 +24,22 @@
 #endif
 
 enum {
-    TASK_TYPE               = 0xfc0,
-    TASK_FLAGS              = 0xfc4,
-    TASK_UCODE_BOOT         = 0xfc8,
-    TASK_UCODE_BOOT_SIZE    = 0xfcc,
-    TASK_UCODE              = 0xfd0,
-    TASK_UCODE_SIZE         = 0xfd4,
-    TASK_UCODE_DATA         = 0xfd8,
-    TASK_UCODE_DATA_SIZE    = 0xfdc,
-    TASK_DRAM_STACK         = 0xfe0,
-    TASK_DRAM_STACK_SIZE    = 0xfe4,
-    TASK_OUTPUT_BUFF        = 0xfe8,
-    TASK_OUTPUT_BUFF_SIZE   = 0xfec,
-    TASK_DATA_PTR           = 0xff0,
-    TASK_DATA_SIZE          = 0xff4,
-    TASK_YIELD_DATA_PTR     = 0xff8,
-    TASK_YIELD_DATA_SIZE    = 0xffc
+    TASK_TYPE = 0xfc0,
+    TASK_FLAGS = 0xfc4,
+    TASK_UCODE_BOOT = 0xfc8,
+    TASK_UCODE_BOOT_SIZE = 0xfcc,
+    TASK_UCODE = 0xfd0,
+    TASK_UCODE_SIZE = 0xfd4,
+    TASK_UCODE_DATA = 0xfd8,
+    TASK_UCODE_DATA_SIZE = 0xfdc,
+    TASK_DRAM_STACK = 0xfe0,
+    TASK_DRAM_STACK_SIZE = 0xfe4,
+    TASK_OUTPUT_BUFF = 0xfe8,
+    TASK_OUTPUT_BUFF_SIZE = 0xfec,
+    TASK_DATA_PTR = 0xff0,
+    TASK_DATA_SIZE = 0xff4,
+    TASK_YIELD_DATA_PTR = 0xff8,
+    TASK_YIELD_DATA_SIZE = 0xffc
 };
 
 static inline unsigned int align(unsigned int x, unsigned amount)
@@ -89,10 +65,10 @@ static inline uint32_t* pt_u32(const unsigned char* buffer, unsigned address)
     return (uint32_t*)(buffer + address);
 }
 
-void load_u8 (uint8_t*  dst, const unsigned char* buffer, unsigned address, size_t count);
+void load_u8(uint8_t* dst, const unsigned char* buffer, unsigned address, size_t count);
 void load_u16(uint16_t* dst, const unsigned char* buffer, unsigned address, size_t count);
 void load_u32(uint32_t* dst, const unsigned char* buffer, unsigned address, size_t count);
-void store_u8 (unsigned char* buffer, unsigned address, const uint8_t*  src, size_t count);
+void store_u8(unsigned char* buffer, unsigned address, const uint8_t* src, size_t count);
 void store_u16(unsigned char* buffer, unsigned address, const uint16_t* src, size_t count);
 void store_u32(unsigned char* buffer, unsigned address, const uint32_t* src, size_t count);
 

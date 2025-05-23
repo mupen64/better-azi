@@ -1,15 +1,10 @@
-/****************************************************************************
-*                                                                           *
-* Azimer's HLE Audio Plugin for Project64 Legacy Compatible N64 Emulators   *
-* https://www.project64-legacy.com/                                         *
-* Copyright (C) 2000-2023 Azimer. All rights reserved.                      *
-*                                                                           *
-* License:                                                                  *
-* GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html                        *
-*                                                                           *
-****************************************************************************/
 /*
-	NoSound Driver to demonstrate how to use the SoundDriver interface
+ * Copyright (c) 2025, Mupen64 maintainers, contributors, and original authors (Azimer, Bobby Smiles).
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ */
+/*
+    NoSound Driver to demonstrate how to use the SoundDriver interface
 */
 #include "NoSoundDriver.h"
 #include "SoundDriverFactory.h"
@@ -17,91 +12,90 @@
 #include <unistd.h>
 #endif
 
-bool NoSoundDriver::ClassRegistered = NoSoundDriver::ValidateDriver() ?
-		SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_NOSOUND, NoSoundDriver::CreateSoundDriver, "No Sound Driver", 0) :
-		false;
+bool NoSoundDriver::ClassRegistered = NoSoundDriver::ValidateDriver() ? SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_NOSOUND, NoSoundDriver::CreateSoundDriver, "No Sound Driver", 0) : false;
 
 bool NoSoundDriver::ValidateDriver()
 {
-	// No Sound should always be an option.  The only issue is if GetTickCount isn't supported or something similar
-	return true;
+    // No Sound should always be an option.  The only issue is if GetTickCount isn't supported or something similar
+    return true;
 }
 
 Boolean NoSoundDriver::Initialize()
 {
-	dllInitialized = true;
-	isPlaying = false;
-	m_SamplesPerSecond = false;
-	lastTick = 0;
-	return true;
+    dllInitialized = true;
+    isPlaying = false;
+    m_SamplesPerSecond = false;
+    lastTick = 0;
+    return true;
 }
 
 void NoSoundDriver::DeInitialize()
 {
-	isPlaying = false;
-	dllInitialized = false;
-	lastTick = 0;
+    isPlaying = false;
+    dllInitialized = false;
+    lastTick = 0;
 }
 
 // Management functions
 void NoSoundDriver::AiUpdate(Boolean Wait)
 {
-	u32 bytes;
-	u32 tick, tickdiff;
-	Wait = Wait; // Avoids unreferences parameter warning.  Required as part of the Project64 API
+    u32 bytes;
+    u32 tick, tickdiff;
+    Wait = Wait; // Avoids unreferences parameter warning.  Required as part of the Project64 API
 
-	while (Wait)
-	{
+    while (Wait)
+    {
 
-		// GetTickCount - Retrieves the number of milliseconds that have elapsed since the system was started, up to 49.7 days.
+        // GetTickCount - Retrieves the number of milliseconds that have elapsed since the system was started, up to 49.7 days.
 #if defined(_WIN32) || defined(_XBOX)
-		if (lastTick == 0)
-			lastTick = GetTickCount();
-#endif	
+        if (lastTick == 0)
+            lastTick = GetTickCount();
+#endif
 
-		if (isPlaying == true)
-		{
+        if (isPlaying == true)
+        {
 #if defined(_WIN32) || defined(_XBOX)
-			Sleep(5);
-			tick = GetTickCount();
-			tickdiff = tick - lastTick;
-			lastTick = tick;
+            Sleep(5);
+            tick = GetTickCount();
+            tickdiff = tick - lastTick;
+            lastTick = tick;
 #else
-			usleep(5);
-			tickdiff = 50;
-#endif	
-			if (tickdiff > 50)
-			{
-				tickdiff = 50;
-			}
-			bytes = (m_SamplesPerSecond / 1000) * 4 * tickdiff; // Play tickdiff ms of audio
-			if (bytes > 0) LoadAiBuffer(NULL, bytes);
-		}
-		else
-		{
+            usleep(5);
+            tickdiff = 50;
+#endif
+            if (tickdiff > 50)
+            {
+                tickdiff = 50;
+            }
+            bytes = (m_SamplesPerSecond / 1000) * 4 * tickdiff; // Play tickdiff ms of audio
+            if (bytes > 0)
+                LoadAiBuffer(NULL, bytes);
+        }
+        else
+        {
 #if defined(_WIN32) || defined(_XBOX)
-			Sleep(1);
+            Sleep(1);
 #else
-			usleep(1);
-#endif	
-		}
-	}
+            usleep(1);
+#endif
+        }
+    }
 }
 
 void NoSoundDriver::StopAudio()
 {
-	isPlaying = false;
+    isPlaying = false;
 }
 
 void NoSoundDriver::StartAudio()
 {
-	isPlaying = true;
+    isPlaying = true;
 }
 
 void NoSoundDriver::SetFrequency(u32 Frequency)
 {
 #ifdef _WIN32
-	UNREFERENCED_PARAMETER(Frequency);
+    UNREFERENCED_PARAMETER(Frequency);
 #else
 #endif
 }

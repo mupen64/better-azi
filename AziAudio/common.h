@@ -1,18 +1,13 @@
-/****************************************************************************
-*                                                                           *
-* Azimer's HLE Audio Plugin for Project64 Legacy Compatible N64 Emulators   *
-* https://www.project64-legacy.com/                                         *
-* Copyright (C) 2000-2023 Azimer. All rights reserved.                      *
-*                                                                           *
-* License:                                                                  *
-* GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html                        *
-*                                                                           *
-****************************************************************************/
+/*
+ * Copyright (c) 2025, Mupen64 maintainers, contributors, and original authors (Azimer, Bobby Smiles).
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ */
 
 //************ Configuration Section ************** (to be moved to compile time defines)
 
 // Configure the plugin to have a console window for informational output -- should be used for debugging only
-//#define USE_PRINTF
+// #define USE_PRINTF
 
 #ifdef _WIN32
 #define ENABLE_BACKEND_DIRECTSOUND8_LEGACY
@@ -23,14 +18,14 @@
 #define ENABLE_BACKEND_WASAPI
 #define ENABLE_BACKEND_WAVEOUT
 #endif
-//#define ENABLE_BACKEND_PORTAUDIO // NYI
+// #define ENABLE_BACKEND_PORTAUDIO // NYI
 
 #ifndef _COMMON_DOT_H_
 #define _COMMON_DOT_H_
 
 #include <stddef.h> // size_t definition
 
-#if defined (_XBOX)
+#if defined(_XBOX)
 #include <xtl.h>
 #include "../3rd Party/XBox/xbox_depp.h"
 #elif defined(_WIN32)
@@ -59,44 +54,41 @@ extern OSVERSIONINFOEX OSInfo;
 #endif
 
 
-
-
 #include "my_types.h"
 
-enum SoundDriverType
-{
-	SND_DRIVER_NOSOUND = 0x0000,
-// Windows-only
-	SND_DRIVER_DS8L = 0x1000,
-	SND_DRIVER_DS8 = 0x1001,
-	SND_DRIVER_XA2L = 0x1002,
-	SND_DRIVER_XA2 = 0x1003,
-	SND_DRIVER_WASAPI = 0x1004,
-	SND_DRIVER_WAVEOUT = 0x1005,
-// Cross Platform
-	SND_DRIVER_PORTAUDIO = 0x1100  // NYI
+enum SoundDriverType {
+    SND_DRIVER_NOSOUND = 0x0000,
+    // Windows-only
+    SND_DRIVER_DS8L = 0x1000,
+    SND_DRIVER_DS8 = 0x1001,
+    SND_DRIVER_XA2L = 0x1002,
+    SND_DRIVER_XA2 = 0x1003,
+    SND_DRIVER_WASAPI = 0x1004,
+    SND_DRIVER_WAVEOUT = 0x1005,
+    // Cross Platform
+    SND_DRIVER_PORTAUDIO = 0x1100 // NYI
 };
 
 
 typedef struct {
-	u16 Version;
-	u32 BufferSize;
-	Boolean doAIHACK;
-	Boolean syncAudio;
-	Boolean fillAudio;
-	Boolean oldStyle;
-	Boolean Reserved2;
-	Boolean Reserved3;
-	u32  Reserved4;
-	u32  Reserved5;
-	u32  Reserved6;
+    u16 Version;
+    u32 BufferSize;
+    Boolean doAIHACK;
+    Boolean syncAudio;
+    Boolean fillAudio;
+    Boolean oldStyle;
+    Boolean Reserved2;
+    Boolean Reserved3;
+    u32 Reserved4;
+    u32 Reserved5;
+    u32 Reserved6;
 } rSettings;
 extern rSettings RegSettings;
 #endif
 
 #define AUDIOCODE 0
-#define HLECODE   1
-#define CPUCODE   2
+#define HLECODE 1
+#define CPUCODE 2
 
 #define PLUGIN_VERSION "1.7.1"
 
@@ -117,54 +109,63 @@ extern rSettings RegSettings;
 
 #ifdef ENABLEPROFILING
 
-	extern u64 ProfileStartTimes[30];
-	extern u64 ProfileTimes[30];
+extern u64 ProfileStartTimes[30];
+extern u64 ProfileTimes[30];
 
-	inline void StartProfile (int profile) {
-		u64 start;
-		__asm {
+inline void StartProfile(int profile)
+{
+    u64 start;
+    __asm {
 			rdtsc;
 			mov dword ptr [start+0], eax;
 			mov dword ptr [start+4], edx;
-		}
-		ProfileStartTimes[profile] = start;
-	}
+    }
+    ProfileStartTimes[profile] = start;
+}
 
-	inline void EndProfile (int profile) {
-		u64 end;
-		__asm {
+inline void EndProfile(int profile)
+{
+    u64 end;
+    __asm {
 			rdtsc;
 			mov dword ptr [end+0], eax;
 			mov dword ptr [end+4], edx;
-		}
-		ProfileTimes[profile] = ProfileTimes[profile] + (end - ProfileStartTimes[profile]);
-	}
-	inline void PrintProfiles () {
-		FILE *dfile = fopen ("d:\\profile.txt", "wt");
-		u64 totalTimes = 0;
-		for (int x = 0; x < 30; x++) {
-			if (ProfileTimes[x] != 0) {
-				fprintf (dfile, "Times for %i is: %08X %08X\n", x, (u32)(ProfileTimes[x] >> 32), (u32)ProfileTimes[x]);
-				totalTimes += ProfileTimes[x];
-			}
-		}
-		for (x = 0; x < 30; x++) {
-			if (ProfileTimes[x] != 0) {
-				fprintf (dfile, "Percent Time for %i is: %i%%\n", x, (u32)((ProfileTimes[x]*100) / totalTimes));			
-			}
-		}
-		fclose (dfile);
-	}
-	inline void ClearProfiles () {
-		for (int x = 0; x < 30; x++) {
-			ProfileTimes[x] = 0;
-		}
-	}
+    }
+    ProfileTimes[profile] = ProfileTimes[profile] + (end - ProfileStartTimes[profile]);
+}
+inline void PrintProfiles()
+{
+    FILE* dfile = fopen("d:\\profile.txt", "wt");
+    u64 totalTimes = 0;
+    for (int x = 0; x < 30; x++)
+    {
+        if (ProfileTimes[x] != 0)
+        {
+            fprintf(dfile, "Times for %i is: %08X %08X\n", x, (u32)(ProfileTimes[x] >> 32), (u32)ProfileTimes[x]);
+            totalTimes += ProfileTimes[x];
+        }
+    }
+    for (x = 0; x < 30; x++)
+    {
+        if (ProfileTimes[x] != 0)
+        {
+            fprintf(dfile, "Percent Time for %i is: %i%%\n", x, (u32)((ProfileTimes[x] * 100) / totalTimes));
+        }
+    }
+    fclose(dfile);
+}
+inline void ClearProfiles()
+{
+    for (int x = 0; x < 30; x++)
+    {
+        ProfileTimes[x] = 0;
+    }
+}
 #else
-#	define StartProfile(profile) //
-#	define EndProfile(profile) //
-#	define PrintProfiles() //
-#	define ClearProfiles()//
+#define StartProfile(profile) //
+#define EndProfile(profile) //
+#define PrintProfiles() //
+#define ClearProfiles() //
 #endif
 
 /*

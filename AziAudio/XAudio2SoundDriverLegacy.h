@@ -1,16 +1,11 @@
-/****************************************************************************
-*                                                                           *
-* Azimer's HLE Audio Plugin for Project64 Legacy Compatible N64 Emulators   *
-* https://www.project64-legacy.com/                                         *
-* Copyright (C) 2000-2023 Azimer. All rights reserved.                      *
-*                                                                           *
-* License:                                                                  *
-* GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html                        *
-*                                                                           *
-****************************************************************************/
+/*
+ * Copyright (c) 2025, Mupen64 maintainers, contributors, and original authors (Azimer, Bobby Smiles).
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ */
 
 #pragma once
-//#define _WIN32_WINNT 0x0601
+// #define _WIN32_WINNT 0x0601
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -18,76 +13,76 @@
 #include "SoundDriverLegacy.h"
 #include <xaudio2.h>
 
-class VoiceCallbackLegacy : public IXAudio2VoiceCallback
-{
+class VoiceCallbackLegacy : public IXAudio2VoiceCallback {
 public:
-	//HANDLE hBufferEndEvent;
-	VoiceCallbackLegacy() /*: hBufferEndEvent(CreateEvent(NULL, FALSE, FALSE, NULL))*/{}
-	~VoiceCallbackLegacy(){/* CloseHandle(hBufferEndEvent); */}
+    // HANDLE hBufferEndEvent;
+    VoiceCallbackLegacy() /*: hBufferEndEvent(CreateEvent(NULL, FALSE, FALSE, NULL))*/ {}
+    ~VoiceCallbackLegacy() { /* CloseHandle(hBufferEndEvent); */ }
 
-	//Called when the voice has just finished playing a contiguous audio stream.
-	void __stdcall OnStreamEnd() {/* SetEvent(hBufferEndEvent); */}
+    // Called when the voice has just finished playing a contiguous audio stream.
+    void __stdcall OnStreamEnd() { /* SetEvent(hBufferEndEvent); */ }
 
-	//Unused methods are stubs
-	
-	void __stdcall OnVoiceProcessingPassEnd() { }
-	void __stdcall OnVoiceProcessingPassStart(UINT32 SamplesRequired);// {}
-	void __stdcall OnBufferEnd(void * pBufferContext);//    {}
-	void __stdcall OnBufferStart(void * pBufferContext) { UNREFERENCED_PARAMETER(pBufferContext); }
-	void __stdcall OnLoopEnd(void * pBufferContext) { UNREFERENCED_PARAMETER(pBufferContext); }
-	void __stdcall OnVoiceError(void * pBufferContext, HRESULT Error) { UNREFERENCED_PARAMETER(pBufferContext); UNREFERENCED_PARAMETER(Error); }
-	
-	/*
-	STDMETHOD_(void, OnVoiceProcessingPassStart) (THIS_ UINT32 BytesRequired);
-	STDMETHOD_(void, OnVoiceProcessingPassEnd) (THIS);
-	STDMETHOD_(void, OnStreamEnd) (THIS);
-	STDMETHOD_(void, OnBufferStart) (THIS_ void* pBufferContext);
-	STDMETHOD_(void, OnBufferEnd) (THIS_ void* pBufferContext);
-	STDMETHOD_(void, OnLoopEnd) (THIS_ void* pBufferContext);
-	STDMETHOD_(void, OnVoiceError) (THIS_ void* pBufferContext, HRESULT Error);
-	*/
+    // Unused methods are stubs
+
+    void __stdcall OnVoiceProcessingPassEnd() {}
+    void __stdcall OnVoiceProcessingPassStart(UINT32 SamplesRequired); // {}
+    void __stdcall OnBufferEnd(void* pBufferContext); //    {}
+    void __stdcall OnBufferStart(void* pBufferContext) { UNREFERENCED_PARAMETER(pBufferContext); }
+    void __stdcall OnLoopEnd(void* pBufferContext) { UNREFERENCED_PARAMETER(pBufferContext); }
+    void __stdcall OnVoiceError(void* pBufferContext, HRESULT Error)
+    {
+        UNREFERENCED_PARAMETER(pBufferContext);
+        UNREFERENCED_PARAMETER(Error);
+    }
+
+    /*
+    STDMETHOD_(void, OnVoiceProcessingPassStart) (THIS_ UINT32 BytesRequired);
+    STDMETHOD_(void, OnVoiceProcessingPassEnd) (THIS);
+    STDMETHOD_(void, OnStreamEnd) (THIS);
+    STDMETHOD_(void, OnBufferStart) (THIS_ void* pBufferContext);
+    STDMETHOD_(void, OnBufferEnd) (THIS_ void* pBufferContext);
+    STDMETHOD_(void, OnLoopEnd) (THIS_ void* pBufferContext);
+    STDMETHOD_(void, OnVoiceError) (THIS_ void* pBufferContext, HRESULT Error);
+    */
 };
 
-class XAudio2SoundDriverLegacy :
-	public SoundDriverLegacy
-{	
+class XAudio2SoundDriverLegacy : public SoundDriverLegacy {
 public:
-	XAudio2SoundDriverLegacy();
-	~XAudio2SoundDriverLegacy();
-	
-	// Setup and Teardown Functions
-	BOOL Initialize();
-	void DeInitialize();
+    XAudio2SoundDriverLegacy();
+    ~XAudio2SoundDriverLegacy();
 
-	BOOL Setup();
-	void Teardown();
+    // Setup and Teardown Functions
+    BOOL Initialize();
+    void DeInitialize();
 
-	// Buffer Functions for the Audio Code
-	void SetFrequency(u32 Frequency);           // Sets the Nintendo64 Game Audio Frequency
-	u32 AddBuffer(u8 *start, u32 length);       // Uploads a new buffer and returns status
+    BOOL Setup();
+    void Teardown();
 
-	// Management functions
-	void AiUpdate(BOOL Wait);
-	void StopAudio();							// Stops the Audio PlayBack (as if paused)
-	void StartAudio();							// Starts the Audio PlayBack (as if unpaused)
-	u32 GetReadStatus();						// Returns the status on the read pointer
+    // Buffer Functions for the Audio Code
+    void SetFrequency(u32 Frequency); // Sets the Nintendo64 Game Audio Frequency
+    u32 AddBuffer(u8* start, u32 length); // Uploads a new buffer and returns status
 
-	void SetVolume(u32 volume);
+    // Management functions
+    void AiUpdate(BOOL Wait);
+    void StopAudio(); // Stops the Audio PlayBack (as if paused)
+    void StartAudio(); // Starts the Audio PlayBack (as if unpaused)
+    u32 GetReadStatus(); // Returns the status on the read pointer
 
-	//void PlayBuffer(int bufferNumber, u8* bufferData, int bufferSize);
+    void SetVolume(u32 volume);
 
-	static SoundDriverInterface* CreateSoundDriver() { return new XAudio2SoundDriverLegacy(); }
-	static bool ValidateDriver();
+    // void PlayBuffer(int bufferNumber, u8* bufferData, int bufferSize);
+
+    static SoundDriverInterface* CreateSoundDriver() { return new XAudio2SoundDriverLegacy(); }
+    static bool ValidateDriver();
 
 protected:
-
-	bool dllInitialized;
-	static DWORD WINAPI AudioThreadProc(LPVOID lpParameter);
+    bool dllInitialized;
+    static DWORD WINAPI AudioThreadProc(LPVOID lpParameter);
 
 private:
-	HANDLE hAudioThread;
-	bool   bStopAudioThread;
-	static bool ClassRegistered;
+    HANDLE hAudioThread;
+    bool bStopAudioThread;
+    static bool ClassRegistered;
 };
 
 /*

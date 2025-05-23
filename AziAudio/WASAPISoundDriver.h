@@ -1,64 +1,61 @@
-/****************************************************************************
-*                                                                           *
-* Azimer's HLE Audio Plugin for Project64 Legacy Compatible N64 Emulators   *
-* https://www.project64-legacy.com/                                         *
-* Copyright (C) 2000-2023 Azimer. All rights reserved.                      *
-*                                                                           *
-* License:                                                                  *
-* GNU/GPLv2 http://www.gnu.org/licenses/gpl-2.0.html                        *
-*                                                                           *
-****************************************************************************/
+/*
+ * Copyright (c) 2025, Mupen64 maintainers, contributors, and original authors (Azimer, Bobby Smiles).
+ *
+ * SPDX-License-Identifier: GPL-2.0-or-later
+ */
 
 #pragma once
-//#define _WIN32_WINNT 0x0601
+// #define _WIN32_WINNT 0x0601
 #ifdef _WIN32
 #include <windows.h>
 #endif
 
 #include "SoundDriver.h"
 
-class WASAPISoundDriver :
-	public SoundDriver
-{
+class WASAPISoundDriver : public SoundDriver {
 public:
-	WASAPISoundDriver();
-	~WASAPISoundDriver();
+    WASAPISoundDriver();
+    ~WASAPISoundDriver();
 
-	// Setup and Teardown Functions
-	BOOL Initialize();
-	void DeInitialize();
+    // Setup and Teardown Functions
+    BOOL Initialize();
+    void DeInitialize();
 
-	// Buffer Functions for the Audio Code
-	void SetFrequency(u32 Frequency);           // Sets the Nintendo64 Game Audio Frequency
+    // Buffer Functions for the Audio Code
+    void SetFrequency(u32 Frequency); // Sets the Nintendo64 Game Audio Frequency
 
-	// Management functions
-	void AiUpdate(BOOL Wait) { if (Wait) WaitMessage(); };
-	void StopAudio();							// Stops the Audio PlayBack (as if paused)
-	void StartAudio();							// Starts the Audio PlayBack (as if unpaused)
+    // Management functions
+    void AiUpdate(BOOL Wait)
+    {
+        if (Wait)
+            WaitMessage();
+    };
+    void StopAudio(); // Stops the Audio PlayBack (as if paused)
+    void StartAudio(); // Starts the Audio PlayBack (as if unpaused)
 
-	void SetVolume(u32 volume);
+    void SetVolume(u32 volume);
 
-	static SoundDriverInterface* CreateSoundDriver() { return new WASAPISoundDriver(); }
+    static SoundDriverInterface* CreateSoundDriver() { return new WASAPISoundDriver(); }
 
-	u32 LoadAiBufferResample(u8 *start, u32 length, float ratio);
+    u32 LoadAiBufferResample(u8* start, u32 length, float ratio);
 
-	// Override the default in SoundDriver
-	//u32 WASAPISoundDriver::LoadAiBuffer(u8 *start, u32 length);
+    // Override the default in SoundDriver
+    // u32 WASAPISoundDriver::LoadAiBuffer(u8 *start, u32 length);
 
-	static bool ValidateDriver();
+    static bool ValidateDriver();
 
 protected:
-	static DWORD WINAPI AudioThreadProc(LPVOID lpParameter);
+    static DWORD WINAPI AudioThreadProc(LPVOID lpParameter);
 
-	//bool dllInitialized;
-	bool bInitialized;
-	float m_Volume;
+    // bool dllInitialized;
+    bool bInitialized;
+    float m_Volume;
 
 private:
-	HANDLE hAudioThread;
-	bool   bStopAudioThread;
-	bool   m_CoUninit;
-	static bool ClassRegistered;
+    HANDLE hAudioThread;
+    bool bStopAudioThread;
+    bool m_CoUninit;
+    static bool ClassRegistered;
 };
 
 #if !defined(_MSC_VER)
