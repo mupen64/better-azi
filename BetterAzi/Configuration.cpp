@@ -9,6 +9,7 @@
 #include "SoundDriverInterface.h"
 #include "SoundDriverFactory.h"
 #include <windows.h>
+#include <cassert>
 
 #define CONFIGFILENAME "AzimersLegacyAudio.ini"
 
