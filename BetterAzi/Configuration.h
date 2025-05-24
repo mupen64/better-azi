@@ -79,7 +79,6 @@ public:
     static bool config_save();
     static bool config_save_rom();
     static void ConfigDialog(HWND hParent);
-    static void AboutDialog(HWND hParent);
 
     static bool getAIEmulation() { return currentSettings.configAIEmulation; }
     static unsigned long getVolume() { return configVolume; }

@@ -14,72 +14,54 @@
 #include <cassert>
 
 SoundDriverInterface* snd = NULL;
-
-bool ai_delayed_carry; // Borrowed from MAME and Mupen64Plus
+bool ai_delayed_carry;
 bool bBackendChanged = false;
 bool first_time = true;
-
-void SetTimerResolution(void);
-
 HINSTANCE hInstance;
 OSVERSIONINFOEX OSInfo;
+AUDIO_INFO AudioInfo;
+u32 Dacrate = 0;
 
-#ifdef __GNUC__
-extern "C"
-#endif
 
-#ifdef _WIN32
-bool WINAPI
-DllMain(
-HINSTANCE hinstDLL, // handle to DLL module
-DWORD fdwReason, // reason for calling function
-LPVOID lpvReserved // reserved
-)
+void SetTimerResolution()
 {
-    UNREFERENCED_PARAMETER(lpvReserved);
-    UNREFERENCED_PARAMETER(fdwReason);
+    const HMODULE hmod = GetModuleHandle("ntdll.dll");
+    if (!hmod)
+    {
+        return;
+    }
+
+    typedef LONG(NTAPI * tNtSetTimerResolution)(IN ULONG DesiredResolution, IN Boolean SetResolution, OUT PULONG CurrentResolution);
+    tNtSetTimerResolution NtSetTimerResolution = (tNtSetTimerResolution)GetProcAddress(hmod, "NtSetTimerResolution");
+    ULONG CurrentResolution = 0;
+    NtSetTimerResolution(10000, TRUE, &CurrentResolution);
+}
+
+bool WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+{
     hInstance = hinstDLL;
     return TRUE;
 }
-#endif
 
 EXPORT void CALL DllAbout(HWND hParent)
 {
-#if defined(_WIN32) || defined(_XBOX)
-    Configuration::AboutDialog(hParent);
-#else
-    puts(PLUGIN_FULL_NAME);
-#endif
+    const auto msg = PLUGIN_FULL_NAME "\n"
+                                      "Part of the Mupen64 project family."
+                                      "\n\n"
+                                      "https://github.com/mupen64/better-azi";
+
+    MessageBox((HWND)hParent, msg, "About", MB_ICONINFORMATION | MB_OK);
 }
 
 EXPORT void CALL DllConfig(HWND hParent)
 {
-#if defined(_WIN32) && !defined(_XBOX)
     SoundDriverType currentDriver = Configuration::getDriver();
     Configuration::ConfigDialog(hParent);
     if (currentDriver != Configuration::getDriver())
     {
         bBackendChanged = true;
     }
-#else
-    fputs("To do:  Implement saving configuration settings.\n", stderr);
-#endif
 }
-
-EXPORT void CALL DllTest(HWND hParent)
-{
-#if defined(_WIN32)
-    MessageBoxA(hParent, "Azimers's Legacy Audio ", "About", MB_OK);
-#else
-    puts("DllTest");
-#endif
-}
-
-// Initialization / Deinitalization Functions
-
-// Note: We call CloseDLL just in case the audio plugin was already initialized...
-AUDIO_INFO AudioInfo;
-u32 Dacrate = 0;
 
 EXPORT Boolean CALL InitiateAudio(AUDIO_INFO Audio_Info)
 {
@@ -88,20 +70,6 @@ EXPORT Boolean CALL InitiateAudio(AUDIO_INFO Audio_Info)
         snd->AI_Shutdown();
         delete snd;
     }
-
-#ifdef USE_PRINTF
-    RedirectIOToConsole();
-    DEBUG_OUTPUT("Logging to console enabled...\n");
-#endif
-#ifdef _WIN32
-    ZeroMemory(&OSInfo, sizeof(OSVERSIONINFOEX));
-    OSInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-    GetVersionEx((LPOSVERSIONINFO)&OSInfo);
-    DEBUG_OUTPUT "%04X %04X\n", _WIN32_WINNT, WINVER;
-    DEBUG_OUTPUT "Windows %li.%li  Build %li, Platform: %li\n", OSInfo.dwMajorVersion, OSInfo.dwMinorVersion, OSInfo.dwBuildNumber, OSInfo.dwPlatformId;
-#endif
-    // Dacrate = 0;
-    // CloseDLL ();
 
     if (Configuration::getResTimer() == true)
     {
@@ -143,7 +111,7 @@ EXPORT void CALL GetDllInfo(PLUGIN_INFO* PluginInfo)
     PluginInfo->NormalMemory = FALSE;
     safe_strcpy(PluginInfo->Name, 100, PLUGIN_FULL_NAME);
     PluginInfo->Type = PLUGIN_TYPE_AUDIO;
-    PluginInfo->Version = 0x0101; // Set this to retain backwards compatibility
+    PluginInfo->Version = 0x0101;
 }
 
 EXPORT void CALL ProcessAList(void)
@@ -161,16 +129,10 @@ EXPORT void CALL ProcessAList(void)
 
 EXPORT void CALL RomOpen(void)
 {
-    Configuration::RomRunning = true;
-    // if (first_time)
-    {
-        first_time = false;
-        Configuration::LoadSettings();
-    }
     DEBUG_OUTPUT "Call: RomOpen()\n";
-    if (snd == NULL)
-        return;
-    // snd->AI_ResetAudio();
+    Configuration::RomRunning = true;
+    first_time = false;
+    Configuration::LoadSettings();
 }
 
 EXPORT void CALL RomClosed(void)
@@ -197,7 +159,7 @@ EXPORT void CALL RomClosed(void)
 
 EXPORT void CALL AiDacrateChanged(int SystemType)
 {
-    u32 Frequency, video_clock;
+    u32 video_clock;
 
     ai_delayed_carry = false;
     DEBUG_OUTPUT "Call: AiDacrateChanged()\n";
@@ -207,14 +169,7 @@ EXPORT void CALL AiDacrateChanged(int SystemType)
         return;
 
     Dacrate = *AudioInfo.AI_DACRATE_REG & 0x00003FFF;
-#ifdef _DEBUG
-    if (Dacrate != *AudioInfo.AI_DACRATE_REG)
-        MessageBoxA(
-        NULL,
-        "Unknown/reserved bits in AI_DACRATE_REG set.",
-        "Warning",
-        MB_ICONWARNING);
-#endif
+
     switch (SystemType)
     {
     default:
@@ -229,8 +184,9 @@ EXPORT void CALL AiDacrateChanged(int SystemType)
         video_clock = 48628316;
         break;
     }
-    Frequency = video_clock / (Dacrate + 1);
-#if 1
+
+    u32 Frequency = video_clock / (Dacrate + 1);
+
     if (Frequency > 7000 && Frequency < 9000)
         Frequency = 8000;
     else if (Frequency > 10000 && Frequency < 12000)
@@ -247,7 +203,6 @@ EXPORT void CALL AiDacrateChanged(int SystemType)
         Frequency = 48000;
     else
         DEBUG_OUTPUT "Unable to standardize Frequeny!\n";
-#endif
     DEBUG_OUTPUT "Frequency = %i\n", Frequency;
     snd->AI_SetFrequency(Frequency);
 }
@@ -281,103 +236,15 @@ EXPORT u32 CALL AiReadLength(void)
 
 EXPORT void CALL AiUpdate(Boolean Wait)
 {
-    // static int intCount = 0;
-
-    if (snd == NULL)
+    if (!snd)
     {
-#if defined(_WIN32) || defined(_XBOX)
         Sleep(1);
-#endif
         return;
     }
     snd->AI_Update(Wait);
-    return;
 }
 
 int safe_strcpy(char* dst, size_t limit, const char* src)
 {
-#if defined(_MSC_VER) && !defined(_XBOX)
     return strcpy_s(dst, limit, src);
-#else
-    size_t bytes;
-    int failure;
-
-    if (dst == NULL || src == NULL)
-        return (failure = 22); /* EINVAL, from MSVC <errno.h> */
-
-    bytes = strlen(src) + 1; /* strlen("abc") + 1 == 4 bytes */
-    failure = 34; /* ERANGE, from MSVC <errno.h> */
-    if (bytes > limit)
-        bytes = limit;
-    else
-        failure = 0;
-
-    memcpy(dst, src, bytes);
-    dst[limit - 1] = '\0'; /* in case of ERANGE, may not be null-terminated */
-    return (failure);
-#endif
 }
-
-#ifdef USE_PRINTF
-static const unsigned short MAX_CONSOLE_LINES = 500;
-void RedirectIOToConsole()
-{
-#if !defined(_XBOX) && defined(_WIN32)
-    // int hConHandle;
-    // long lStdHandle;
-    // CONSOLE_SCREEN_BUFFER_INFO coninfo;
-    // FILE *fp;
-    //  allocate a console for this app
-    FreeConsole();
-    if (!AllocConsole())
-        return;
-    *stdout = *freopen("CONOUT$", "w", stdout);
-    // freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
-    //// set the screen buffer to be big enough to let us scroll text
-    // GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &coninfo);
-    // coninfo.dwSize.Y = MAX_CONSOLE_LINES;
-    // SetConsoleScreenBufferSize(GetStdHandle(STD_OUTPUT_HANDLE), coninfo.dwSize);
-    //// redirect unbuffered STDOUT to the console
-    // lStdHandle = (long)GetStdHandle(STD_OUTPUT_HANDLE);
-    // hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-    // fp = _fdopen(hConHandle, "w");
-    //*stdout = *fp;
-    // setvbuf(stdout, NULL, _IONBF, 0);
-    //// redirect unbuffered STDIN to the console
-    // lStdHandle = (long)GetStdHandle(STD_INPUT_HANDLE);
-    // hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-    // fp = _fdopen(hConHandle, "r");
-    //*stdin = *fp;
-    // setvbuf(stdin, NULL, _IONBF, 0);
-    //// redirect unbuffered STDERR to the console
-    // lStdHandle = (long)GetStdHandle(STD_ERROR_HANDLE);
-    // hConHandle = _open_osfhandle(lStdHandle, _O_TEXT);
-    // fp = _fdopen(hConHandle, "w");
-    //*stderr = *fp;
-    // setvbuf(stderr, NULL, _IONBF, 0);
-    //// make cout, wcout, cin, wcin, wcerr, cerr, wclog and clog
-    //// point to console as well
-    // std::ios::sync_with_stdio();
-
-#endif
-}
-#endif
-
-#ifdef _WIN32
-/*
-    Time resolution code borrowed from Project64-Audio
-    Will be set as an optional parameter
-
- */
-void SetTimerResolution(void)
-{
-    HMODULE hMod = GetModuleHandle("ntdll.dll");
-    if (hMod != NULL)
-    {
-        typedef LONG(NTAPI * tNtSetTimerResolution)(IN ULONG DesiredResolution, IN Boolean SetResolution, OUT PULONG CurrentResolution);
-        tNtSetTimerResolution NtSetTimerResolution = (tNtSetTimerResolution)GetProcAddress(hMod, "NtSetTimerResolution");
-        ULONG CurrentResolution = 0;
-        NtSetTimerResolution(10000, TRUE, &CurrentResolution);
-    }
-}
-#endif

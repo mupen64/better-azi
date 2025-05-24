@@ -12,7 +12,6 @@
             <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
             <WholeProgramOptimization>false</WholeProgramOptimization>
             <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-            <SmallerTypeCheck Condition="$(PlatformToolsetVersion)&lt;140">true</SmallerTypeCheck>
             <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
         </ClCompile>
         <Midl>

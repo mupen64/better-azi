@@ -256,19 +256,6 @@ void Configuration::ConfigDialog(HWND hParent)
     SaveSettings();
 }
 
-void Configuration::AboutDialog(HWND hParent)
-{
-#define ABOUTMESSAGE                                         \
-    PLUGIN_FULL_NAME                                         \
-    "\nby Azimer\n"                                          \
-    "\nHome: https://www.project64-legacy.com/\n"            \
-    "Source: https://github.com/pj64team/Project64-Legacy\n" \
-    "\n"                                                     \
-    "MusyX code credited to Bobby Smiles and Mupen64Plus\n"
-
-    MessageBoxA(hParent, ABOUTMESSAGE, "About", MB_OK | MB_ICONINFORMATION);
-}
-
 void Configuration::ResetAdvancedPage(HWND hDlg)
 {
     Settings tmp = currentSettings;
@@ -300,8 +287,6 @@ void Configuration::ResetAdvancedPage(HWND hDlg)
 
 INT_PTR CALLBACK Configuration::AdvancedProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    UNREFERENCED_PARAMETER(wParam);
-
     switch (uMsg)
     {
     case WM_INITDIALOG:

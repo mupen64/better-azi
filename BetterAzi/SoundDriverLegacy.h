@@ -33,7 +33,7 @@ public:
     // Sound Driver Factory method
     static SoundDriverLegacy* SoundDriverFactory();
 
-    virtual void SetVolume(u32 volume) { UNREFERENCED_PARAMETER(volume); }; // We could potentially do this ourselves within the buffer copy method
+    virtual void SetVolume(u32 volume) {}; // We could potentially do this ourselves within the buffer copy method
     virtual ~SoundDriverLegacy() {};
 
     void AI_SetFrequency(u32 Frequency);

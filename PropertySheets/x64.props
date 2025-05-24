@@ -5,15 +5,6 @@
         <Import Project="PlatformBase.props"/>
     </ImportGroup>
 
-    <PropertyGroup>
-        <OutDir>$(SolutionDir)bin\$(Configuration)64\</OutDir>
-        <IntDir>$(SolutionDir)build\$(Configuration)64\$(ProjectName)\</IntDir>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(ConfigurationType)'=='StaticLibrary'">
-        <OutDir>$(SolutionDir)bin\$(Configuration)64\lib\</OutDir>
-    </PropertyGroup>
-
     <ItemDefinitionGroup>
         <ClCompile>
             <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
