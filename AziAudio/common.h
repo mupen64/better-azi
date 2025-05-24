@@ -19,25 +19,10 @@
 #ifndef _COMMON_DOT_H_
 #define _COMMON_DOT_H_
 
-#include <stddef.h> // size_t definition
-
-#if defined(_XBOX)
-#include <xtl.h>
-#include "../3rd Party/XBox/xbox_depp.h"
-#elif defined(_WIN32)
+#include <stddef.h>
 #include <windows.h>
 #include <commctrl.h>
 extern OSVERSIONINFOEX OSInfo;
-#endif
-
-#ifdef USE_PRINTF
-#include <stdio.h>
-#endif
-#include <assert.h>
-
-#if 0
-#define ENABLEPROFILING
-#endif
 
 #if defined(_MSC_VER)
 #define SEH_SUPPORTED
@@ -78,7 +63,7 @@ extern rSettings RegSettings;
 #define HLECODE 1
 #define CPUCODE 2
 
-#define PLUGIN_VERSION "1.7.1"
+#define PLUGIN_VERSION "1.0.0-rc1"
 
 #ifdef _M_X64
 #define PLUGIN_ARCH " x64"

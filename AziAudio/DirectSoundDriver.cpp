@@ -6,6 +6,7 @@
 
 #include "common.h"
 #include <stdio.h>
+#include <cassert>
 #include "DirectSoundDriver.h"
 #include "AudioSpec.h"
 #include "SoundDriverFactory.h"

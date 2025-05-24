@@ -6,7 +6,7 @@
 
 /* memcpy() */
 #include <string.h>
-
+#include <cassert>
 #include "audiohle.h"
 
 u16 DeWindowLUT[0x420] = {

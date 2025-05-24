@@ -11,6 +11,7 @@
 #include "audiohle.h"
 #include <string.h> // memcpy(), strcpy()
 #include <stdio.h> // needed for configuration
+#include <cassert>
 
 SoundDriverInterface* snd = NULL;
 

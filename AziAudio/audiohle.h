@@ -163,31 +163,7 @@ extern bool isZeldaABI;
 extern s32 acc[32][N];
 extern s16 acc_clamped[N];
 
-/*
- * Include the SSE2 headers if MSVC is set to target SSE2 in code generation.
- * [Update 2015.07.08 ... or if targeting Intel x86_64.]
- */
-#if defined(_M_IX86_FP) && (_M_IX86_FP >= 2)
 #include <emmintrin.h>
-#endif
-#if defined(_M_X64)
-#include <emmintrin.h>
-#endif
-
-/* ... or if compiled with the right preprocessor token on other compilers */
-#ifdef SSE2_SUPPORT
-#include <emmintrin.h>
-#endif
-
-/* The SSE1 and SSE2 headers always define these macro functions: */
-#undef SSE2_SUPPORT
-#if defined(_MM_SHUFFLE) && defined(_MM_SHUFFLE2)
-#define SSE2_SUPPORT
-#endif
-
-#if 0
-#define PREFER_MACRO_FUNCTIONS
-#endif
 
 /*
  * RSP hardware has two types of saturated arithmetic:

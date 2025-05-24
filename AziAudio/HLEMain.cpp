@@ -217,36 +217,7 @@ void HLEStart()
         }
     }
 
-    // memcpy (imem+0x80, rdram+((u32*)dmem)[0xFD0/4], ((u32*)dmem)[0xFD4/4]);
-
-#ifdef ENABLELOG
-    u32 times[NUM_ABI_COMMANDS];
-    u32 calls[NUM_ABI_COMMANDS];
-    u32 list = 0;
-    u32 total;
-
-    // memcpy (dmem, rdram+UCData, UDataLen); // Load UCode Data (for RSP stuff)
-
-    memset(times, 0, NUM_ABI_COMMANDS * sizeof(u32));
-    memset(calls, 0, NUM_ABI_COMMANDS * sizeof(u32));
-    u64 start, end;
-#endif
-
     ListLen = ListLen >> 2;
-
-#if 0
-	if (*(u32*)(rdram + UCData + 0x30) == 0x0B396696) {
-		//printf ("MusyX Detected\n");
-		void smDetect();
-		if (ABI[0] != ABI5[0])
-			smDetect();
-		//ChangeABI (5); // This will be replaced with ProcessMusyX
-		//RspClosed();
-		//*RSPInfo.SP_PC_REG = 0x1000;
-		//DoRspCycles(100);
-		return;
-	}
-#endif
 
     for (u32 x = 0; x < ListLen; x += 2)
     {
@@ -255,58 +226,16 @@ void HLEStart()
         k0 = HLEPtr[x + 0];
         t9 = HLEPtr[x + 1];
         command = (unsigned char)(k0 >> 24 & 0xFF);
-#if 0
-		assert(command == command % NUM_ABI_COMMANDS);
-		command %= NUM_ABI_COMMANDS;
-#endif
 
-//		fprintf (dfile, "k0: %08X  t9: %08X\n", k0, t9);
-#ifdef ENABLELOG
-        __asm {
-			rdtsc;
-			mov dword ptr [start+0], eax;
-			mov dword ptr [start+4], edx;
-        }
-#endif
         StartProfile(2 + command);
         ABI[command]();
         EndProfile(2 + command);
-#ifdef ENABLELOG
-        __asm {
-			rdtsc;
-			mov dword ptr [end+0], eax;
-			mov dword ptr [end+4], edx;
-        }
-        calls[command]++;
-        times[command] += (u32)(end - start);
-#endif
     }
-#ifdef ENABLELOG
-    fprintf(dfile, "List #%i\n", list++);
-    total = 0;
-    for (x = 0; x < NUM_ABI_COMMANDS; x++)
-        total += times[x];
-    for (x = 0; x < NUM_ABI_COMMANDS; x++)
-    {
-        if (calls[x] != 0)
-            fprintf(dfile,
-                    "Command: %02X - Calls: %3i - Total Time: %6i - Avg Time: %8.2f - Percent: %5.2f%%\n",
-                    x,
-                    calls[x],
-                    times[x],
-                    (float)times[x] / (float)calls[x],
-                    ((float)times[x] / (float)total) * 100.0);
-    }
-#endif
-
-    //	fclose (dfile);
-    //	assert(0);
 }
 
 #ifndef PREFER_MACRO_FUNCTIONS
 INLINE s32 sats_over(s32 slice)
 {
-#ifdef TWOS_COMPLEMENT_NEGATION
     s32 adder, mask;
 
     adder = +32767 - slice;
@@ -314,15 +243,9 @@ INLINE s32 sats_over(s32 slice)
     mask &= ~((s32)slice >> 31); /*  && x >= 0) */
     adder &= mask;
     return (s32)(slice + adder); /* slice + (+32767 - slice) == +32767 */
-#else
-    if (slice > +32767)
-        return +32767;
-    return (slice);
-#endif
 }
 INLINE s32 sats_under(s32 slice)
 {
-#ifdef TWOS_COMPLEMENT_NEGATION
     s32 adder, mask;
 
     adder = +32768 + slice;
@@ -330,81 +253,39 @@ INLINE s32 sats_under(s32 slice)
     mask &= (s32)slice >> 31; /*  && x < 0) */
     adder &= mask;
     return (s32)(slice - adder); /* slice - (slice + 32768) == -32768 */
-#else
-    if (slice < -32768)
-        return -32768;
-    return (slice);
-#endif
 }
 
 s16 pack_signed(s32 slice)
 {
-#ifdef SSE2_SUPPORT
     __m128i xmm;
 
     xmm = _mm_cvtsi32_si128(slice);
     xmm = _mm_packs_epi32(xmm, xmm);
     return (s16)_mm_cvtsi128_si32(xmm); /* or:  return _mm_extract_epi16(xmm, 0); */
-#else
-    s32 result;
-
-    result = slice;
-    result = sats_under(result);
-    result = sats_over(result);
-    return (s16)(result & 0x0000FFFFul);
-#endif
 }
 
 void vsats128(s16* vd, s32* vs)
 {
-#ifdef SSE2_SUPPORT
     __m128i result, xmm_hi, xmm_lo;
 
     xmm_hi = _mm_loadu_si128((__m128i*)&vs[0]);
     xmm_lo = _mm_loadu_si128((__m128i*)&vs[4]);
     result = _mm_packs_epi32(xmm_hi, xmm_lo);
     _mm_storeu_si128((__m128i*)vd, result);
-#else
-    register size_t i;
-
-    for (i = 0; i < 8; i++)
-        vd[i] = pack_signed(vs[i]);
-#endif
 }
 #endif
 
 void copy_vector(void* vd, const void* vs)
 {
-#if defined(SSE2_SUPPORT)
-    /* MOVDQU  XMMWORD PTR[vd], XMMWORD PTR[vs] */
     _mm_storeu_si128((__m128i*)vd, _mm_loadu_si128((__m128i*)vs));
-#elif defined(SSE1_SUPPORT)
-    /* MOVUPS  XMMWORD PTR[vd], XMMWORD PTR[vs] */
-    _mm_storeu_ps((float*)vd, _mm_loadu_ps((float*)vs));
-#elif 0
-    /* MOVDQA  XMMWORD PTR[vd], XMMWORD PTR[vs] */
-    /* MOVAPS  XMMWORD PTR[vd], XMMWORD PTR[vs] */
-    *(__m128*)vd = *(__m128*)vs; /* Crash if vd or vs not 128-bit aligned! */
-#else
-    memcpy(vd, vs, 8 * sizeof(i16));
-#endif
 }
 
 void swap_elements(void* vd, const void* vs)
 {
-#ifdef SSE2_SUPPORT
     __m128i RSP_as_XMM;
 
     RSP_as_XMM = _mm_loadu_si128((__m128i*)vs);
     RSP_as_XMM = _mm_shufflehi_epi16(RSP_as_XMM, _MM_SHUFFLE(2, 3, 0, 1));
     RSP_as_XMM = _mm_shufflelo_epi16(RSP_as_XMM, _MM_SHUFFLE(2, 3, 0, 1));
     _mm_storeu_si128((__m128i*)vd, RSP_as_XMM);
-#else
-    i16 temp_vector[8];
-    register size_t i;
-
-    for (i = 0; i < 8; i++)
-        temp_vector[i] = ((i16*)vs)[i ^ 1];
-    copy_vector(vd, temp_vector);
-#endif
 }

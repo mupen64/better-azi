@@ -28,7 +28,7 @@
             <OutputFile>$(OutDir)$(ProjectName).bsc</OutputFile>
         </Bscmake>
         <ClCompile>
-            <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WIN32;_WINDOWS;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+            <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WIN32;_WINDOWS;WIN32_LEAN_AND_MEAN;SSE2_SUPPORT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
             <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
             <PreprocessToFile>false</PreprocessToFile>
             <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>

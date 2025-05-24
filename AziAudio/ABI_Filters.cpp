@@ -17,7 +17,7 @@ static void packed_multiply_accumulate(i32* acc_in, i16* vs, i16* vt)
 {
     i32 pre_buffer[8];
     i32 result;
-#ifdef SSE2_SUPPORT
+
     __m128i xmm_source, xmm_target;
 
     xmm_source = _mm_loadu_si128((__m128i*)vs);
@@ -25,25 +25,14 @@ static void packed_multiply_accumulate(i32* acc_in, i16* vs, i16* vt)
     xmm_source = _mm_madd_epi16(xmm_source, xmm_target);
     _mm_storeu_si128((__m128i*)pre_buffer, xmm_source);
     result = pre_buffer[0] + pre_buffer[1] + pre_buffer[2] + pre_buffer[3];
-#else
-    register int i;
 
-    for (i = 0; i < 8; i++)
-        pre_buffer[i] = (s32)vs[i] * (s32)vt[i];
-    result = 0;
-    for (i = 0; i < 8; i++)
-        result += pre_buffer[i];
-#endif
     *acc_in = result;
-    return;
 }
 
 // rdot is borrowed from Mupen64Plus audio.c file, modified for SSE2
 s32 rdot_ABI(size_t n, const s16* x, const s16* y)
 {
-#if defined(SSE2_SUPPORT)
     __m128i xmm_source, xmm_target;
-#endif
     s32 accumulators[4];
     s16 b[8]; /* (n <= 8) in all calls to this function. */
     register size_t i;
@@ -51,24 +40,15 @@ s32 rdot_ABI(size_t n, const s16* x, const s16* y)
     y += n;
     --y;
 
-#if 0
-	assert(n <= 8);
-#endif
     memset(&b[0], 0x0000, 8 * sizeof(s16));
     for (i = 0; i < n; i++)
         b[i] = *(y - i);
 
-#if defined(SSE2_SUPPORT)
     xmm_target = _mm_loadu_si128((__m128i*)&x[0]);
     xmm_source = _mm_loadu_si128((__m128i*)&b[0]);
     xmm_target = _mm_madd_epi16(xmm_target, xmm_source);
     _mm_storeu_si128((__m128i*)&accumulators[0], xmm_target);
-#else
-    for (i = 0; i < 4; i++)
-        accumulators[i] =
-        x[2 * i + 0] * b[2 * i + 0] +
-        x[2 * i + 1] * b[2 * i + 1];
-#endif
+
     return accumulators[0] + accumulators[1] +
     accumulators[2] + accumulators[3];
 }
@@ -165,9 +145,7 @@ extern u16 adpcmtable[]; // size of 0x88 * 2
 // We need to refactor for enabling POLEF across the board as well
 void POLEF()
 {
-#if defined(SSE2_SUPPORT)
     __m128i xmm_source, xmm_target, prod_hi, prod_lo, prod_m, prod_n, xmm_gain;
-#endif
     u8 Flags = (u8)(k0 >> 16 & 0xff);
     s16 Gain = (u16)(k0 & 0xffff);
     u32 Address = t9 & 0xffffff; // + SEGMENTS[(t9>>24)&0xf];
@@ -196,7 +174,6 @@ void POLEF()
         l2 = hleMixerWorkArea[3];
     }
 
-#if defined(SSE2_SUPPORT)
     xmm_target = _mm_loadu_si128((__m128i*)h2);
     xmm_gain = _mm_set1_epi16(Gain);
     _mm_storeu_si128((__m128i*)&h2_before[0], xmm_target);
@@ -209,11 +186,6 @@ void POLEF()
     prod_lo = _mm_srai_epi32(prod_lo, 14);
     prod_hi = _mm_packs_epi32(prod_hi, prod_lo);
     _mm_storeu_si128((__m128i*)&h2[0], prod_hi);
-#else
-    copy_vector(&h2_before[0], &h2[0]);
-    for (i = 0; i < 8; i++)
-        h2[i] = ((s32)h2[i] * Gain) >> 14;
-#endif
 
     s16* inp = (s16*)(BufferSpace + AudioInBuffer);
 
@@ -223,7 +195,6 @@ void POLEF()
         s16 frame[8];
 
         swap_elements(&frame[0], &inp[0]);
-#if defined(SSE2_SUPPORT)
         xmm_target = _mm_loadu_si128((__m128i*)&frame[0]);
 
         prod_m = _mm_mulhi_epi16(xmm_target, xmm_gain);
@@ -251,14 +222,7 @@ void POLEF()
 
         _mm_storeu_si128((__m128i*)&accumulators[0], prod_hi);
         _mm_storeu_si128((__m128i*)&accumulators[4], prod_lo);
-#else
-        for (i = 0; i < 8; i++)
-            accumulators[i] = frame[i] * Gain;
-        for (i = 0; i < 8; i++)
-            accumulators[i] += h1[i] * l1;
-        for (i = 0; i < 8; i++)
-            accumulators[i] += h2_before[i] * l2;
-#endif
+
         for (i = 0; i < 8; i++)
             accumulators[i] += rdot_ABI(i, &h2[0], &frame[0]);
         for (i = 0; i < 8; i++)

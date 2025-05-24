@@ -8,6 +8,7 @@
 #include "XAudio2SoundDriver.h"
 #include "AudioSpec.h"
 #include <stdio.h>
+#include <cassert>
 #include "SoundDriverFactory.h"
 
 bool XAudio2SoundDriver::ClassRegistered = SoundDriverFactory::RegisterSoundDriver(SND_DRIVER_XA2, CreateSoundDriver, "XAudio2 Driver", 15);

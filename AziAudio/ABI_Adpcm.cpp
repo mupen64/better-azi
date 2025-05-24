@@ -19,16 +19,13 @@ void InitInput(s16* inp, int index, u8 icode, u8 mask, u8 shifter, int vscale)
 
 void ADPCM_madd(s32* a, s16* book1, s16* book2, s16 l1, s16 l2, s16* inp)
 {
-#if defined(SSE2_SUPPORT)
     __m128i xmm_source, xmm_target;
     __m128i prod_m, prod_n; /* [0] 0xMMMMNNNN, [1] 0xMMMMNNNN, ... [7] */
     __m128i prod_hi, prod_lo; /* (s32)[0, 1, 2, 3], (s32)[4, 5, 6, 7] */
-#endif
     s32 accumulators[4];
     s16 b[8];
     register int i;
 
-#if defined(SSE2_SUPPORT)
     xmm_source = _mm_set1_epi16(l1);
     xmm_target = _mm_loadu_si128((__m128i*)book1);
     prod_m = _mm_mulhi_epi16(xmm_target, xmm_source);
@@ -66,31 +63,10 @@ void ADPCM_madd(s32* a, s16* book1, s16* book2, s16 l1, s16 l2, s16* inp)
     prod_lo = _mm_add_epi32(prod_lo, prod_n);
     _mm_storeu_si128((__m128i*)&a[0], prod_hi);
     _mm_storeu_si128((__m128i*)&a[4], prod_lo);
-#else
-    for (i = 0; i < 8; i++)
-        a[i] = (s32)l1;
-    for (i = 0; i < 8; i++)
-        a[i] *= (s32)book1[i];
 
-    for (i = 0; i < 8; i++)
-        b[i] = l2;
-    for (i = 0; i < 8; i++)
-        a[i] += (s32)b[i] * (s32)book2[i];
-
-    for (i = 0; i < 8; i++)
-        a[i] += 2048 * inp[i];
-#endif
-
-#if defined(SSE2_SUPPORT)
     _mm_storeu_si128((__m128i*)&b[0], _mm_setzero_si128());
     xmm_source = _mm_loadu_si128((__m128i*)inp);
-#endif
 
-    /*
-     *	for (j = 0; j < 8; j++)
-     *		for (i = 0; i < j; i++)
-     *			a[j] += (s32)book2[j - i - 1] * inp[i];
-     */
     for (i = 0; i < 1; i++)
         b[i] = book2[0 - i];
     accumulators[0] = (s32)b[0] * (s32)inp[0];
@@ -98,77 +74,56 @@ void ADPCM_madd(s32* a, s16* book1, s16* book2, s16 l1, s16 l2, s16* inp)
 
     for (i = 0; i < 2; i++)
         b[i] = book2[1 - i];
-#if defined(SSE2_SUPPORT)
+
     xmm_target = _mm_loadu_si128((__m128i*)&b[0]);
     xmm_target = _mm_madd_epi16(xmm_target, xmm_source);
     _mm_storeu_si128((__m128i*)&accumulators[0], xmm_target);
-#else
-    accumulators[0] = (s32)b[0] * (s32)inp[0] + (s32)b[1] * (s32)inp[1];
-#endif
+
     a[2] += accumulators[0];
 
     for (i = 0; i < 3; i++)
         b[i] = book2[2 - i];
-#if defined(SSE2_SUPPORT)
+
     xmm_target = _mm_loadu_si128((__m128i*)&b[0]);
     xmm_target = _mm_madd_epi16(xmm_target, xmm_source);
     _mm_storeu_si128((__m128i*)&accumulators[0], xmm_target);
-#else
-    accumulators[0] = (s32)b[0] * (s32)inp[0] + (s32)b[1] * (s32)inp[1];
-    accumulators[1] = (s32)b[2] * (s32)inp[2];
-#endif
+
     a[3] += accumulators[0] + accumulators[1];
 
     for (i = 0; i < 4; i++)
         b[i] = book2[3 - i];
-#if defined(SSE2_SUPPORT)
+
     xmm_target = _mm_loadu_si128((__m128i*)&b[0]);
     xmm_target = _mm_madd_epi16(xmm_target, xmm_source);
     _mm_storeu_si128((__m128i*)&accumulators[0], xmm_target);
-#else
-    accumulators[0] = (s32)b[0] * (s32)inp[0] + (s32)b[1] * (s32)inp[1];
-    accumulators[1] = (s32)b[2] * (s32)inp[2] + (s32)b[3] * (s32)inp[3];
-#endif
+
     a[4] += accumulators[0] + accumulators[1];
 
     for (i = 0; i < 5; i++)
         b[i] = book2[4 - i];
-#if defined(SSE2_SUPPORT)
+
     xmm_target = _mm_loadu_si128((__m128i*)&b[0]);
     xmm_target = _mm_madd_epi16(xmm_target, xmm_source);
     _mm_storeu_si128((__m128i*)&accumulators[0], xmm_target);
-#else
-    accumulators[0] = (s32)b[0] * (s32)inp[0] + (s32)b[1] * (s32)inp[1];
-    accumulators[1] = (s32)b[2] * (s32)inp[2] + (s32)b[3] * (s32)inp[3];
-    accumulators[2] = (s32)b[4] * (s32)inp[4];
-#endif
+
     a[5] += accumulators[0] + accumulators[1] + accumulators[2];
 
     for (i = 0; i < 6; i++)
         b[i] = book2[5 - i];
-#if defined(SSE2_SUPPORT)
+
     xmm_target = _mm_loadu_si128((__m128i*)&b[0]);
     xmm_target = _mm_madd_epi16(xmm_target, xmm_source);
     _mm_storeu_si128((__m128i*)&accumulators[0], xmm_target);
-#else
-    accumulators[0] = (s32)b[0] * (s32)inp[0] + (s32)b[1] * (s32)inp[1];
-    accumulators[1] = (s32)b[2] * (s32)inp[2] + (s32)b[3] * (s32)inp[3];
-    accumulators[2] = (s32)b[4] * (s32)inp[4] + (s32)b[5] * (s32)inp[5];
-#endif
+
     a[6] += accumulators[0] + accumulators[1] + accumulators[2];
 
     for (i = 0; i < 7; i++)
         b[i] = book2[6 - i];
-#if defined(SSE2_SUPPORT)
+
     xmm_target = _mm_loadu_si128((__m128i*)&b[0]);
     xmm_target = _mm_madd_epi16(xmm_target, xmm_source);
     _mm_storeu_si128((__m128i*)&accumulators[0], xmm_target);
-#else
-    accumulators[0] = (s32)b[0] * (s32)inp[0] + (s32)b[1] * (s32)inp[1];
-    accumulators[1] = (s32)b[2] * (s32)inp[2] + (s32)b[3] * (s32)inp[3];
-    accumulators[2] = (s32)b[4] * (s32)inp[4] + (s32)b[5] * (s32)inp[5];
-    accumulators[3] = (s32)b[6] * (s32)inp[6];
-#endif
+
     a[7] += accumulators[0] + accumulators[1] + accumulators[2] + accumulators[3];
 }
 
