@@ -13,9 +13,9 @@ void SoundDriver::AI_LenChanged(u8* start, u32 length)
 {
     if (length == 0)
     {
-        *AudioInfo.AI_STATUS_REG = 0;
-        *AudioInfo.MI_INTR_REG |= MI_INTR_AI;
-        AudioInfo.CheckInterrupts();
+        *AudioInfo.ai_status_reg = 0;
+        *AudioInfo.mi_intr_reg |= MI_INTR_AI;
+        AudioInfo.check_interrupts();
         return;
     }
 
@@ -69,10 +69,10 @@ void SoundDriver::AI_LenChanged(u8* start, u32 length)
 
     if (Configuration::getAIEmulation() == true)
     {
-        *AudioInfo.AI_STATUS_REG = AI_STATUS_DMA_BUSY;
+        *AudioInfo.ai_status_reg = AI_STATUS_DMA_BUSY;
         if (m_AI_DMAPrimaryBytes > 0 && m_AI_DMASecondaryBytes > 0)
         {
-            *AudioInfo.AI_STATUS_REG = AI_STATUS_DMA_BUSY | AI_STATUS_FIFO_FULL;
+            *AudioInfo.ai_status_reg = AI_STATUS_DMA_BUSY | AI_STATUS_FIFO_FULL;
         }
     }
     BufferAudio();
@@ -195,7 +195,7 @@ void SoundDriver::AI_Update(Boolean Wait)
 
 void SoundDriver::BufferAudio()
 {
-    m_DMAEnabled = (*AudioInfo.AI_CONTROL_REG & AI_CONTROL_DMA_ON) == AI_CONTROL_DMA_ON;
+    m_DMAEnabled = (*AudioInfo.ai_control_reg & AI_CONTROL_DMA_ON) == AI_CONTROL_DMA_ON;
     if (m_DMAEnabled == false)
         return;
     while (m_BufferRemaining < m_MaxBufferSize && (m_AI_DMAPrimaryBytes > 0 || m_AI_DMASecondaryBytes > 0))
@@ -219,12 +219,12 @@ void SoundDriver::BufferAudio()
             {
                 lastReadLength = 0;
                 lastReadCount = 0;
-                *AudioInfo.AI_STATUS_REG = AI_STATUS_DMA_BUSY;
-                *AudioInfo.AI_STATUS_REG &= ~AI_STATUS_FIFO_FULL;
-                *AudioInfo.MI_INTR_REG |= MI_INTR_AI;
-                AudioInfo.CheckInterrupts();
+                *AudioInfo.ai_status_reg = AI_STATUS_DMA_BUSY;
+                *AudioInfo.ai_status_reg &= ~AI_STATUS_FIFO_FULL;
+                *AudioInfo.mi_intr_reg |= MI_INTR_AI;
+                AudioInfo.check_interrupts();
                 if (m_AI_DMAPrimaryBytes == 0)
-                    *AudioInfo.AI_STATUS_REG = 0;
+                    *AudioInfo.ai_status_reg = 0;
             }
         }
     }
@@ -245,7 +245,7 @@ u32 SoundDriver::LoadAiBuffer(u8* start, u32 length)
     assert((length & 0x3) == 0);
     assert(bytesToMove <= m_MaxBufferSize); // We shouldn't be asking for more.
 
-    m_DMAEnabled = (*AudioInfo.AI_CONTROL_REG & AI_CONTROL_DMA_ON) == AI_CONTROL_DMA_ON;
+    m_DMAEnabled = (*AudioInfo.ai_control_reg & AI_CONTROL_DMA_ON) == AI_CONTROL_DMA_ON;
 
     if (bytesToMove > m_MaxBufferSize)
     {

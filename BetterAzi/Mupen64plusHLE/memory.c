@@ -6,8 +6,8 @@
 
 #include <string.h>
 #include <assert.h>
-
-#include "common.h"
+#include <cstdint>
+#include "../my_types.h"
 
 /*
  * 2017.02.09:  helpers taken from "memory.h"
@@ -17,6 +17,7 @@
  * unused function warnings from unclean practice.  We could try for a more
  * modular design, but the below 3 functions are straightforward to paste in.
  */
+
 
 static uint8_t* pt_u8(const unsigned char* buffer, unsigned address)
 {

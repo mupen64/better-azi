@@ -6,14 +6,15 @@
 
 #include <assert.h>
 #include <stddef.h>
+#include "../my_types.h"
+#include "arithmetics.h"
 
 #define S16(hex)                           \
     ((hex) & 0x8000u)                      \
     ? -(signed)((~(hex##u) + 1) & 0x7FFFu) \
     : +(hex)
 
-#include "arithmetics.h"
-const i16 RESAMPLE_LUT[64 * 4] = {
+i16 RESAMPLE_LUT[64 * 4] = {
 0x0c39,
 0x66ad,
 0x0d46,

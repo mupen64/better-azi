@@ -6,7 +6,6 @@
 
 #include "common.h"
 #include "XAudio2SoundDriver.h"
-#include "AudioSpec.h"
 #include <stdio.h>
 #include <cassert>
 #include "SoundDriverFactory.h"

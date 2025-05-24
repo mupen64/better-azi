@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "my_types.h"
+
 class Settings {
 public:
     unsigned long configFrequency;

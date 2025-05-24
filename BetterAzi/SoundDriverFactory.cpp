@@ -48,7 +48,7 @@ bool SoundDriverFactory::RegisterSoundDriver(SoundDriverType DriverType, SoundDr
         FactoryDrivers[FactoryNextSlot].DriverType = DriverType;
         FactoryDrivers[FactoryNextSlot].CreateFunction = CreateFunction;
         FactoryDrivers[FactoryNextSlot].Priority = Priority;
-        safe_strcpy(FactoryDrivers[FactoryNextSlot].Description, 99, Description);
+        strcpy_s(FactoryDrivers[FactoryNextSlot].Description, 99, Description);
         FactoryNextSlot++;
         return true;
     }

@@ -5,7 +5,6 @@
  */
 
 #include "common.h"
-#include "AudioSpec.h"
 #include "SoundDriverInterface.h"
 #include "SoundDriverFactory.h"
 #include "audiohle.h"
@@ -19,7 +18,7 @@ bool bBackendChanged = false;
 bool first_time = true;
 HINSTANCE hInstance;
 OSVERSIONINFOEX OSInfo;
-AUDIO_INFO AudioInfo;
+core_audio_info AudioInfo;
 u32 Dacrate = 0;
 
 
@@ -43,7 +42,7 @@ bool WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
     return TRUE;
 }
 
-EXPORT void CALL DllAbout(HWND hParent)
+EXPORT void CALL DllAbout(void* hParent)
 {
     const auto msg = PLUGIN_FULL_NAME "\n"
                                       "Part of the Mupen64 project family."
@@ -53,17 +52,17 @@ EXPORT void CALL DllAbout(HWND hParent)
     MessageBox((HWND)hParent, msg, "About", MB_ICONINFORMATION | MB_OK);
 }
 
-EXPORT void CALL DllConfig(HWND hParent)
+EXPORT void CALL DllConfig(void* hParent)
 {
     SoundDriverType currentDriver = Configuration::getDriver();
-    Configuration::ConfigDialog(hParent);
+    Configuration::ConfigDialog((HWND)hParent);
     if (currentDriver != Configuration::getDriver())
     {
         bBackendChanged = true;
     }
 }
 
-EXPORT Boolean CALL InitiateAudio(AUDIO_INFO Audio_Info)
+EXPORT Boolean CALL InitiateAudio(core_audio_info Audio_Info)
 {
     if (snd != NULL)
     {
@@ -76,12 +75,12 @@ EXPORT Boolean CALL InitiateAudio(AUDIO_INFO Audio_Info)
         SetTimerResolution();
     }
 
-    memcpy(&AudioInfo, &Audio_Info, sizeof(AUDIO_INFO));
-    DRAM = Audio_Info.RDRAM;
-    DMEM = Audio_Info.DMEM;
-    IMEM = Audio_Info.IMEM;
+    memcpy(&AudioInfo, &Audio_Info, sizeof(core_audio_info));
+    DRAM = Audio_Info.rdram;
+    DMEM = Audio_Info.dmem;
+    IMEM = Audio_Info.imem;
 
-    Configuration::Header = (t_romheader*)Audio_Info.HEADER;
+    Configuration::Header = (t_romheader*)Audio_Info.rom;
     Configuration::LoadDefaults();
     Configuration::LoadSettings();
     snd = SoundDriverFactory::CreateSoundDriver(Configuration::getDriver());
@@ -105,13 +104,13 @@ EXPORT void CALL CloseDLL(void)
     }
 }
 
-EXPORT void CALL GetDllInfo(PLUGIN_INFO* PluginInfo)
+EXPORT void CALL GetDllInfo(core_plugin_info* PluginInfo)
 {
-    PluginInfo->MemoryBswaped = TRUE;
-    PluginInfo->NormalMemory = FALSE;
-    safe_strcpy(PluginInfo->Name, 100, PLUGIN_FULL_NAME);
-    PluginInfo->Type = PLUGIN_TYPE_AUDIO;
-    PluginInfo->Version = 0x0101;
+    PluginInfo->unused_byteswapped = TRUE;
+    PluginInfo->unused_normal_memory = FALSE;
+    strcpy_s(PluginInfo->name, 100, PLUGIN_FULL_NAME);
+    PluginInfo->type = plugin_audio;
+    PluginInfo->ver = 0x0101;
 }
 
 EXPORT void CALL ProcessAList(void)
@@ -165,24 +164,24 @@ EXPORT void CALL AiDacrateChanged(int SystemType)
     DEBUG_OUTPUT "Call: AiDacrateChanged()\n";
     if (snd == NULL)
         return;
-    if (Dacrate == *AudioInfo.AI_DACRATE_REG)
+    if (Dacrate == *AudioInfo.ai_dacrate_reg)
         return;
 
-    Dacrate = *AudioInfo.AI_DACRATE_REG & 0x00003FFF;
+    Dacrate = *AudioInfo.ai_dacrate_reg & 0x00003FFF;
 
     switch (SystemType)
     {
-    default:
-        assert(FALSE);
-    case SYSTEM_NTSC:
+    case 0:
         video_clock = 48681812;
         break;
-    case SYSTEM_PAL:
+    case 1:
         video_clock = 49656530;
         break;
-    case SYSTEM_MPAL:
+    case 2:
         video_clock = 48628316;
         break;
+    default:
+        assert(FALSE);
     }
 
     u32 Frequency = video_clock / (Dacrate + 1);
@@ -209,8 +208,8 @@ EXPORT void CALL AiDacrateChanged(int SystemType)
 
 EXPORT void CALL AiLenChanged(void)
 {
-    u32 address = *AudioInfo.AI_DRAM_ADDR_REG & 0x00FFFFF8;
-    u32 length = *AudioInfo.AI_LEN_REG & 0x3FFF8;
+    u32 address = *AudioInfo.ai_dram_addr_reg & 0x00FFFFF8;
+    u32 length = *AudioInfo.ai_len_reg & 0x3FFF8;
 
     if (snd == NULL)
         return;
@@ -223,15 +222,15 @@ EXPORT void CALL AiLenChanged(void)
     else
         ai_delayed_carry = false;
 
-    snd->AI_LenChanged(AudioInfo.RDRAM + address, length);
+    snd->AI_LenChanged(AudioInfo.rdram + address, length);
 }
 
 EXPORT u32 CALL AiReadLength(void)
 {
     if (snd == NULL)
         return 0;
-    *AudioInfo.AI_LEN_REG = snd->AI_ReadLength();
-    return *AudioInfo.AI_LEN_REG;
+    *AudioInfo.ai_len_reg = snd->AI_ReadLength();
+    return *AudioInfo.ai_len_reg;
 }
 
 EXPORT void CALL AiUpdate(Boolean Wait)
@@ -242,9 +241,4 @@ EXPORT void CALL AiUpdate(Boolean Wait)
         return;
     }
     snd->AI_Update(Wait);
-}
-
-int safe_strcpy(char* dst, size_t limit, const char* src)
-{
-    return strcpy_s(dst, limit, src);
 }

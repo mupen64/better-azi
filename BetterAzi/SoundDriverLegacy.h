@@ -6,19 +6,7 @@
 
 #pragma once
 
-#if defined(_WIN32)
 #include <windows.h>
-#else
-#include <SDL/SDL.h>
-#include <pthread.h>
-#include <unistd.h>
-#endif
-
-/* strcpy() */
-#include <string.h>
-
-#include "common.h"
-#include "AudioSpec.h"
 #include "SoundDriverInterface.h"
 
 #define SND_IS_NOT_EMPTY 0x4000000

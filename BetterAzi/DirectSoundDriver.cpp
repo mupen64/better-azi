@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <cassert>
 #include "DirectSoundDriver.h"
-#include "AudioSpec.h"
 #include "SoundDriverFactory.h"
 
 #define DS_SEGMENTS 4
@@ -188,7 +187,7 @@ BOOL DirectSoundDriver::Initialize()
         return -2;
     }
 
-    if (FAILED(hr = IDirectSound_SetCooperativeLevel(lpds, AudioInfo.hwnd, DSSCL_PRIORITY)))
+    if (FAILED(hr = IDirectSound_SetCooperativeLevel(lpds, (HWND)AudioInfo.main_hwnd, DSSCL_PRIORITY)))
     {
         DEBUG_OUTPUT "DS8: Failed to SetCooperativeLevel\n";
         return -1;
@@ -220,7 +219,7 @@ BOOL DirectSoundDriver::Initialize()
 
     if (SUCCEEDED(hr))
     {
-        IDirectSoundBuffer_SetFormat(lpdsb, &wfm);
+        // IDirectSoundBuffer_SetFormat(lpdsb, &wfm);
         IDirectSoundBuffer_Play(lpdsb, 0, 0, DSBPLAY_LOOPING);
     }
 

@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "common.h"
+#include <cstdint>
 
 static int16_t clamp_s16(int32_t x)
 {

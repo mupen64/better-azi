@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <Windows.h>
 #include <mmreg.h>
 #include <dsound.h>
 #include "SoundDriver.h"

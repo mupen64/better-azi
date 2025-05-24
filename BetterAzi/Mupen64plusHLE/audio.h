@@ -6,9 +6,7 @@
 
 #pragma once
 
-#include "common.h"
-
-extern const int16_t RESAMPLE_LUT[64 * 4];
+extern int16_t RESAMPLE_LUT[64 * 4];
 
 int32_t rdot(size_t n, const int16_t* x, const int16_t* y);
 int16_t adpcm_predict_sample(uint8_t byte, uint8_t mask, unsigned lshift, unsigned rshift);

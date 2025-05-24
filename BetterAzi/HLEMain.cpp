@@ -6,7 +6,7 @@
 
 /* memset() and memcpy() */
 #include <string.h>
-
+#include "Mupen64plusHLE/common.h"
 #include "audiohle.h"
 // #include "RSP/rsp.h"
 
@@ -108,12 +108,6 @@ u32 UCData, UDataLen;
 #pragma message("Logging of Timing info is enabled!!!")
 FILE* dfile = fopen("d:\\HLEInfo.txt", "wt");
 #endif
-
-extern "C" {
-// MusyX HLE provided by Mupen64Plus authored by Bobby Smiles
-void ProcessMusyX_v1();
-void ProcessMusyX_v2();
-}
 
 u32 base, dmembase;
 
@@ -227,9 +221,7 @@ void HLEStart()
         t9 = HLEPtr[x + 1];
         command = (unsigned char)(k0 >> 24 & 0xFF);
 
-        StartProfile(2 + command);
         ABI[command]();
-        EndProfile(2 + command);
     }
 }
 

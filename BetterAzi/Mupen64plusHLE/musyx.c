@@ -5,15 +5,12 @@
  */
 
 #include <string.h>
-#include <stddef.h>
-
-#include "common.h"
-
 #include "arithmetics.h"
 #include "audio.h"
 #include "hle_external.h"
 #include "hle_internal.h"
 #include "memory.h"
+#include "../my_types.h"
 
 /* various constants */
 enum {

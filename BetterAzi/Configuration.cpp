@@ -10,6 +10,7 @@
 #include "SoundDriverFactory.h"
 #include <windows.h>
 #include <cassert>
+#include <commctrl.h>
 
 #define CONFIGFILENAME "AzimersLegacyAudio.ini"
 
@@ -195,7 +196,7 @@ void Configuration::SaveSettings()
 */
 void Configuration::LoadDefaults()
 {
-    safe_strcpy(configAudioLogFolder, 499, "D:\\");
+    strcpy_s(configAudioLogFolder, 499, "D:\\");
     strcpy(configAudioLogFolder, "D:\\");
     configVolume = 0;
     EnumDriverCount = SoundDriverFactory::EnumDrivers(EnumDriverType, 10); // TODO: This needs to be fixed.  10 is an arbitrary number which doesn't meet the 20 set in MAX_FACTORY_DRIVERS

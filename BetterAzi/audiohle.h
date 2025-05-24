@@ -74,11 +74,6 @@
  */
 #define k0 GPR_k0
 
-//------------------------------------------------------------------------------------------
-
-// Use these functions to interface with the HLE Audio...
-#include "AudioSpec.h"
-
 extern u32 t9, k0;
 
 extern u8* DMEM;
